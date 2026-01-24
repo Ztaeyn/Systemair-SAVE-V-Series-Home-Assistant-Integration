@@ -1,0 +1,15 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Setup VSR300 Ventilation",
+        "data": {
+          "name": "Integration Name",
+          "host": "IP Address",
+          "port": "Port",
+          "slave": "Modbus Slave ID"
+        }
+      }
+    }
+  }
+}

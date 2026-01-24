@@ -1,0 +1,5 @@
+{
+  "name": "Systemair VSR300 Modbus",
+  "render_readme": true,
+  "domains": ["sensor", "select", "binary_sensor", "climate"]
+}
