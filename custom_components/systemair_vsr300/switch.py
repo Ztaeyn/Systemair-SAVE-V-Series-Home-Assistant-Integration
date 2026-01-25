@@ -13,9 +13,10 @@ async def async_setup_entry(hass, entry, async_add_entities):
     hub = get_hub(hass, "VSR300")
     config = entry.data
     
-    # You can add more switches to this list later if needed
+    # Add switches here. 
     switches = [
         ("Eco Mode", 2504, "mdi:leaf"),
+        ("Fan Manual Stop Allowed", 1352, "mdi:fan-off"),
     ]
 
     entities = [VSR300Switch(hub, config, *s) for s in switches]
@@ -34,7 +35,7 @@ class VSR300Switch(SwitchEntity):
         self._attr_is_on = False
 
     async def async_turn_on(self, **kwargs):
-        """Write 1 to enable Eco Mode."""
+        """Write 1 to enable."""
         result = await self._hub.async_pb_call(
             self._slave, self._register, 1, CALL_TYPE_WRITE_REGISTER
         )
@@ -43,7 +44,7 @@ class VSR300Switch(SwitchEntity):
             self.async_write_ha_state()
 
     async def async_turn_off(self, **kwargs):
-        """Write 0 to disable Eco Mode."""
+        """Write 0 to disable."""
         result = await self._hub.async_pb_call(
             self._slave, self._register, 0, CALL_TYPE_WRITE_REGISTER
         )

@@ -20,7 +20,7 @@ VSR300_SENSORS = [
     # Temperature
     ("Outdoor Temperature", 12101, SensorDeviceClass.TEMPERATURE, UnitOfTemperature.CELSIUS, 0.1, None, SensorStateClass.MEASUREMENT),
     ("Supply Air Temperature", 12102, SensorDeviceClass.TEMPERATURE, UnitOfTemperature.CELSIUS, 0.1, None, SensorStateClass.MEASUREMENT),
-    ("Efficiency Temperature", 12106, SensorDeviceClass.TEMPERATURE, UnitOfTemperature.CELSIUS, 0.1, None, SensorStateClass.MEASUREMENT),  
+   # ("Efficiency Temperature", 12106, SensorDeviceClass.TEMPERATURE, UnitOfTemperature.CELSIUS, 0.1, None, SensorStateClass.MEASUREMENT),  #Optional Accessory
     ("Overheat Temperature", 12107, SensorDeviceClass.TEMPERATURE, UnitOfTemperature.CELSIUS, 0.1, None, SensorStateClass.MEASUREMENT),      
     ("Exhaust Air Temperature", 12543, SensorDeviceClass.TEMPERATURE, UnitOfTemperature.CELSIUS, 0.1, None, SensorStateClass.MEASUREMENT),
 
@@ -39,7 +39,7 @@ VSR300_SENSORS = [
     ("Heat Recovery", 14102, None, "%", 1.0, "mdi:sync", SensorStateClass.MEASUREMENT),
     ("Current Fan Mode", 1160, None, None, 1.0, "mdi:air-conditioner", None),
     ("Mode Time Remaining", 1111, None, None, 1.0, "mdi:timer-sand", None), 
-   # ("Manual Speed Setting", 1210, None, None, 1.0, "mdi:numeric-box", None),
+   # ("Manual Speed Setting", 1210, None, None, 1.0, "mdi:numeric-box", None),  # Not needed when setting L/M/H
     ("Summer Winter Operation", 1038, None, None, 1, "mdi:sun-snowflake-variant", None),
     ("TRIAC Manual Override", 2148, None, "%", 1.0, "mdi:heating-coil", SensorStateClass.MEASUREMENT),
     ("Filter Time Remaining", 7005, None, None, 1.0, "mdi:clock-end", SensorStateClass.MEASUREMENT),
@@ -129,8 +129,8 @@ class VSR300GenericSensor(SensorEntity):
                     mode_map = {0: "Auto", 1: "Manual", 2: "Crowded", 3: "Refresh", 4: "Fireplace", 5: "Away", 6: "Holiday", 7: "Cooker Hood", 8: "Vacuum Cleaner", 9: "CDI1", 10: "CDI2", 11: "CDI3", 12: "PressureGuard"}
                     self._state = mode_map.get(val, f"Mode {val}")
                 
-                elif self._register == 1210: # Manual Speed
-                    self._state = {0: "Off", 1: "Manual Shitstorm", 2: "Low", 3: "Normal", 4: "High"}.get(val, f"Level {val}")
+#                elif self._register == 1210: # Manual Speed
+#                    self._state = {0: "Off", 1: "Manual Shitstorm", 2: "Low", 3: "Normal", 4: "High"}.get(val, f"Level {val}")
 
                 elif self._register == 1038: # Summer/Winter
                     self._state = "Summer" if val == 0 else "Winter"
