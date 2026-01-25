@@ -45,6 +45,16 @@ class VSR300Button(ButtonEntity):
         self._register = custom_reg
         self._attr_unique_id = f"vsr300_{self._slave}_{name.lower().replace(' ', '_')}"
 
+    @property
+    def device_info(self):
+        """Link this entity to the VSR300 Device."""
+        return {
+            "identifiers": {(DOMAIN, f"vsr300_{self._slave}")},
+            "name": "Systemair VSR300",
+            "manufacturer": "Systemair",
+            "model": "SAVE VSR300",
+        }
+
     async def async_press(self) -> None:
         """Handle button press using the proven Select/Climate logic."""
         try:

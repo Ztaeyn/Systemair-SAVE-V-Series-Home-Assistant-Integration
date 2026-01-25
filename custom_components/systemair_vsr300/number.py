@@ -90,6 +90,16 @@ class VSR300NumberSetpoint(NumberEntity):
         self._attr_unique_id = f"vsr300_number_{self._slave}_{register}"
         self._attr_native_value = None
 
+    @property
+    def device_info(self):
+        """Link this entity to the VSR300 Device."""
+        return {
+            "identifiers": {(DOMAIN, f"vsr300_{self._slave}")},
+            "name": "Systemair VSR300",
+            "manufacturer": "Systemair",
+            "model": "SAVE VSR300",
+        }
+
     async def async_set_native_value(self, value: float) -> None:
         """Write the value to the Modbus register."""
         modbus_value = int(value * self._scale)

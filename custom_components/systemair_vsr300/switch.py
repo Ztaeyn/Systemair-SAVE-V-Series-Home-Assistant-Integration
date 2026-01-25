@@ -34,6 +34,16 @@ class VSR300Switch(SwitchEntity):
         self._attr_unique_id = f"vsr300_switch_{self._slave}_{register}"
         self._attr_is_on = False
 
+    @property
+    def device_info(self):
+        """Link this entity to the VSR300 Device."""
+        return {
+            "identifiers": {(DOMAIN, f"vsr300_{self._slave}")},
+            "name": "Systemair VSR300",
+            "manufacturer": "Systemair",
+            "model": "SAVE VSR300",
+        }
+
     async def async_turn_on(self, **kwargs):
         """Write 1 to enable."""
         result = await self._hub.async_pb_call(

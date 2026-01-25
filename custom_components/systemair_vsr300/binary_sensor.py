@@ -20,7 +20,7 @@ VSR300_BOOLEANS = [
     ("Supply Air Temp Low Alarm", 15176, BinarySensorDeviceClass.PROBLEM, "mdi:thermometer-alert"),
     
     # STATUS / INPUTS
-    ("Extractor Hood Status", 12020, BinarySensorDeviceClass.RUNNING, "mdi:stove"),
+    ("Extractor Hood Status", 12305, BinarySensorDeviceClass.RUNNING, "mdi:stove"),
     ("TRIAC Control Signal", 14380, BinarySensorDeviceClass.POWER, "mdi:sine-wave"),
     ("Maintenance Mode Active", 15000, None, "mdi:wrench-clock"), # Example generic boolean
 ]
@@ -50,6 +50,16 @@ class VSR300BooleanSensor(BinarySensorEntity):
         self._attr_icon = icon
         self._attr_unique_id = f"vsr300_{self._slave}_bool_{address}"
         self._attr_is_on = None
+
+    @property
+    def device_info(self):
+        """Link this entity to the VSR300 Device."""
+        return {
+            "identifiers": {(DOMAIN, f"vsr300_{self._slave}")},
+            "name": "Systemair VSR300",
+            "manufacturer": "Systemair",
+            "model": "SAVE VSR300",
+        }
 
     async def async_update(self):
         """Fetch status from the register."""

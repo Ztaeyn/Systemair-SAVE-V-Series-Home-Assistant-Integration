@@ -60,6 +60,16 @@ class VSR300Climate(ClimateEntity):
         self._attr_min_temp = 12.0
         self._attr_max_temp = 30.0
 
+    @property
+    def device_info(self):
+        """Link this entity to the VSR300 Device."""
+        return {
+            "identifiers": {(DOMAIN, f"vsr300_{self._slave}")},
+            "name": "Systemair VSR300",
+            "manufacturer": "Systemair",
+            "model": "SAVE VSR300",
+        }
+
     async def async_set_temperature(self, **kwargs):
         """Set new target temperature (Register 12108)."""
         if (temp := kwargs.get(ATTR_TEMPERATURE)) is None:

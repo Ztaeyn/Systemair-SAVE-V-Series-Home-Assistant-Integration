@@ -41,6 +41,16 @@ class VSR300Select(SelectEntity):
         self._attr_current_option = None
         self._attr_unique_id = f"vsr300_{self._slave}_vent_mode"
 
+    @property
+    def device_info(self):
+        """Link this entity to the VSR300 Device."""
+        return {
+            "identifiers": {(DOMAIN, f"vsr300_{self._slave}")},
+            "name": "Systemair VSR300",
+            "manufacturer": "Systemair",
+            "model": "SAVE VSR300",
+        }
+
     async def async_select_option(self, option: str) -> None:
         """Set Mode and Speed using working Modbus constants."""
         mode_val, speed_val = VENTILATION_MODES[option]
