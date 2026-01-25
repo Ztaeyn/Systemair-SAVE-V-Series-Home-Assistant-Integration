@@ -1,5 +1,8 @@
-readme todo
+Systemair VSR300 python integration
 
-conversion of the former yaml-based project into python, vibecoded from being able to read python but can't write it yet. (I'm a PLC coder..)
+Work in progress.
 
-work in progress.
+Adds as a device in HA.
+See your_configuration.yaml for the only needed code manually added. (without it I had issues, seems I must provide my own modbus interface?)
+
+<img width="1124" height="776" alt="image" src="https://github.com/user-attachments/assets/616d7609-bdff-4be0-9805-427637dd1d77" />
