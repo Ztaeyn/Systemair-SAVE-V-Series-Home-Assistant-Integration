@@ -90,33 +90,44 @@ class VSR300GenericSensor(SensorEntity):
     async def async_update(self):
         try:
             # --- Handle INPUT Registers (Function 04) ---
-            if self._register in [1111, 1160]:
-                if self._register == 1111:
-                    # 32-bit INPUT Register Timer (1110 & 1111)
-                    res_l = await self._hub.async_pb_call(self._slave, 1110, 1, CALL_TYPE_REGISTER_INPUT)
-                    res_h = await self._hub.async_pb_call(self._slave, 1111, 1, CALL_TYPE_REGISTER_INPUT)
+            if self._register == 1111:
+                # 32-bit INPUT Register Timer (1110 & 1111)
+                res_l = await self._hub.async_pb_call(self._slave, 1110, 1, CALL_TYPE_REGISTER_INPUT)
+                res_h = await self._hub.async_pb_call(self._slave, 1111, 1, CALL_TYPE_REGISTER_INPUT)
 
-                    if res_l and res_h and hasattr(res_l, 'registers'):
-                        total_seconds = (res_h.registers[0] << 16) + res_l.registers[0]
-                        if total_seconds > 0:
-                            h, m = total_seconds // 3600, (total_seconds % 3600) // 60
-                            self._state = f"{h} h {m} min" if h > 0 else f"{m} min"
+                if res_l and res_h and hasattr(res_l, 'registers'):
+                    total_seconds = (res_h.registers[0] << 16) + res_l.registers[0]
+                    if total_seconds > 0:
+                        h, m = total_seconds // 3600, (total_seconds % 3600) // 60
+                        self._state = f"{h} h {m} min" if h > 0 else f"{m} min"
+                    else:
+                        self._state = "Inactive"
+                return
+
+            if self._register == 1160:
+                # Active User mode (Function 04)
+                res_mode = await self._hub.async_pb_call(self._slave, 1160, 1, CALL_TYPE_REGISTER_INPUT)
+                
+                if res_mode and hasattr(res_mode, 'registers'):
+                    val = res_mode.registers[0]
+                    
+                    # If value is 1 (Manual), check Speed Register 1130 (Holding)
+                    if val == 1:
+                        res_speed = await self._hub.async_pb_call(self._slave, 1130, 1, CALL_TYPE_REGISTER_HOLDING)
+                        if res_speed and hasattr(res_speed, 'registers'):
+                            speed_val = res_speed.registers[0]
+                            speed_map = {2: "Low", 3: "Normal", 4: "High"}
+                            self._state = speed_map.get(speed_val, "Manual")
                         else:
-                            self._state = "Inactive"
-                    return
-
-                if self._register == 1160:
-                    # Active User mode is an INPUT Register (Function 04)
-                    result = await self._hub.async_pb_call(self._slave, 1160, 1, CALL_TYPE_REGISTER_INPUT)
-                    if result and hasattr(result, 'registers'):
-                        val = result.registers[0]
+                            self._state = "Manual"
+                    else:
                         mode_map = {
-                            0: "Auto", 1: "Manual", 2: "Crowded", 3: "Refresh", 
+                            0: "Auto", 2: "Crowded", 3: "Refresh", 
                             4: "Fireplace", 5: "Away", 6: "Holiday", 7: "Cooker Hood", 
                             8: "Vacuum Cleaner", 9: "CDI1", 10: "CDI2", 11: "CDI3", 12: "PressureGuard"
                         }
                         self._state = mode_map.get(val, f"Mode {val}")
-                    return
+                return
 
             # --- Handle Filter Time (7005 High, 7006 Low) HOLDING (Function 03) ---
             if self._register == 7005:
@@ -148,7 +159,6 @@ class VSR300GenericSensor(SensorEntity):
 
                 else:
                     float_val = float(val)
-                    # Temperature logic (12xxx range) - handling signed integers
                     if 12000 <= self._register <= 13000 and self._register not in [12400, 12401, 12135]:
                         if float_val > 32767: 
                             float_val -= 65536

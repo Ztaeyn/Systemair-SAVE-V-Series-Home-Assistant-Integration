@@ -16,6 +16,7 @@ VENT_ACTIONS = {
     "Activate Refresh": (4, None),
     "Activate Crowded": (3, None),
     "Activate Away": (6, None),
+    "Activate Auto": (1, None),
     "Stop Ventilation": (0, None),
 }
 
