@@ -42,6 +42,7 @@ VSR300_SENSORS = [
     ("TRIAC Manual Override", 2148, None, "%", 1.0, "mdi:heating-coil", SensorStateClass.MEASUREMENT),
     ("Filter Time Remaining", 7005, None, None, 1.0, "mdi:clock-end", SensorStateClass.MEASUREMENT),
     ("Filter Alarm Code", 7006, None, None, 1.0, "mdi:alert-circle", None),
+    ("Manual Fan Speed Setting", 1130, None, None, 1.0, "mdi:cog-clockwise", None),
 ]
 
 async def async_setup_entry(hass, entry, async_add_entities):
@@ -91,10 +92,8 @@ class VSR300GenericSensor(SensorEntity):
         try:
             # --- Handle INPUT Registers (Function 04) ---
             if self._register == 1111:
-                # 32-bit INPUT Register Timer (1110 & 1111)
                 res_l = await self._hub.async_pb_call(self._slave, 1110, 1, CALL_TYPE_REGISTER_INPUT)
                 res_h = await self._hub.async_pb_call(self._slave, 1111, 1, CALL_TYPE_REGISTER_INPUT)
-
                 if res_l and res_h and hasattr(res_l, 'registers'):
                     total_seconds = (res_h.registers[0] << 16) + res_l.registers[0]
                     if total_seconds > 0:
@@ -105,35 +104,37 @@ class VSR300GenericSensor(SensorEntity):
                 return
 
             if self._register == 1160:
-                # Active User mode (Function 04)
                 res_mode = await self._hub.async_pb_call(self._slave, 1160, 1, CALL_TYPE_REGISTER_INPUT)
-                
                 if res_mode and hasattr(res_mode, 'registers'):
-                    val = res_mode.registers[0]
+                    mode_val = res_mode.registers[0]
                     
-                    # If value is 1 (Manual), check Speed Register 1130 (Holding)
-                    if val == 1:
-                        res_speed = await self._hub.async_pb_call(self._slave, 1130, 1, CALL_TYPE_REGISTER_HOLDING)
-                        if res_speed and hasattr(res_speed, 'registers'):
-                            speed_val = res_speed.registers[0]
-                            speed_map = {2: "Low", 3: "Normal", 4: "High"}
-                            self._state = speed_map.get(speed_val, "Manual")
-                        else:
-                            self._state = "Manual"
+                    # Fetch 1130 for context (Holding)
+                    res_cmd = await self._hub.async_pb_call(self._slave, 1130, 1, CALL_TYPE_REGISTER_HOLDING)
+                    cmd_val = res_cmd.registers[0] if res_cmd and hasattr(res_cmd, 'registers') else None
+
+                    if mode_val == 0:  # Auto
+                        auto_map = {2: "Auto - Low", 3: "Auto - Normal", 4: "Auto - High", 0: "Auto - Normal"}
+                        self._state = auto_map.get(cmd_val, "Auto")
+                    elif mode_val == 1:  # Manual
+                        if cmd_val == 0: self._state = "Manual STOP"
+                        elif cmd_val == 1: self._state = "Some error"
+                        elif cmd_val == 2: self._state = "Manual Low"
+                        elif cmd_val == 3: self._state = "Manual Normal"
+                        elif cmd_val == 4: self._state = "Manual High"
+                        else: self._state = "Manual"
                     else:
                         mode_map = {
-                            0: "Auto", 2: "Crowded", 3: "Refresh", 
-                            4: "Fireplace", 5: "Away", 6: "Holiday", 7: "Cooker Hood", 
-                            8: "Vacuum Cleaner", 9: "CDI1", 10: "CDI2", 11: "CDI3", 12: "PressureGuard"
+                            2: "Crowded", 3: "Refresh", 4: "Fireplace", 5: "Away",
+                            6: "Holiday", 7: "Cooker Hood", 8: "Vacuum Cleaner",
+                            9: "CDI1", 10: "CDI2", 11: "CDI3", 12: "Pressure Guard"
                         }
-                        self._state = mode_map.get(val, f"Mode {val}")
+                        self._state = mode_map.get(mode_val, "invalid state")
                 return
 
-            # --- Handle Filter Time (7005 High, 7006 Low) HOLDING (Function 03) ---
+            # --- Handle Filter Time ---
             if self._register == 7005:
                 res_high = await self._hub.async_pb_call(self._slave, 7005, 1, CALL_TYPE_REGISTER_HOLDING)
                 res_low = await self._hub.async_pb_call(self._slave, 7006, 1, CALL_TYPE_REGISTER_HOLDING)
-
                 if res_high and res_low and hasattr(res_high, 'registers'):
                     total_seconds = (res_high.registers[0] << 16) + res_low.registers[0]
                     days = total_seconds / 86400
@@ -145,28 +146,24 @@ class VSR300GenericSensor(SensorEntity):
                         self._attr_native_unit_of_measurement = "days"
                 return
 
-            # --- Standard Update (Function 03 - Holding Registers) ---
+            # --- Standard Update (Holding Registers) ---
             result = await self._hub.async_pb_call(self._slave, self._register, 1, CALL_TYPE_REGISTER_HOLDING)
-            
             if result and hasattr(result, 'registers'):
                 val = result.registers[0]
-
-                if self._register == 1038: # Summer/Winter
+                if self._register == 1038: 
                     self._state = "Summer" if val == 0 else "Winter"
-                
-                elif self._register == 7006: # Filter Alarm
+                elif self._register == 1130:
+                    speed_map = {1: "Off", 2: "Low", 3: "Normal", 4: "High"}
+                    self._state = speed_map.get(val, f"Level {val}")
+                elif self._register == 7006: 
                     self._state = {0: "No Alarm", 1: "Warning", 2: "Overdue"}.get(val, val)
-
                 else:
                     float_val = float(val)
                     if 12000 <= self._register <= 13000 and self._register not in [12400, 12401, 12135]:
-                        if float_val > 32767: 
-                            float_val -= 65536
-                    
+                        if float_val > 32767: float_val -= 65536
                     self._state = round(float_val * self._scale, 1)
             else:
                 self._state = None
-
         except Exception as e:
             _LOGGER.error("Update failed for %s: %s", self._attr_name, e)
             self._state = None

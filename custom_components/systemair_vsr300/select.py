@@ -4,16 +4,18 @@ from homeassistant.components.select import SelectEntity
 from homeassistant.components.modbus.const import (
     CALL_TYPE_WRITE_REGISTER,
     CALL_TYPE_REGISTER_HOLDING,
+    CALL_TYPE_REGISTER_INPUT, # Added for 1160
 )
 from .const import DOMAIN, CONF_SLAVE
 
 _LOGGER = logging.getLogger(__name__)
 
 # Mapping: "Friendly Name": (Register 1161 Command, Register 1130 Speed or None)
+# Note: These keys are what the user sees in the dropdown
 VENTILATION_MODES = {
-    "Low": (1, 2),    # Manual Mode (1) + Speed 2
-    "Normal": (1, 3), # Manual Mode (1) + Speed 3
-    "High": (1, 4),   # Manual Mode (1) + Speed 4
+    "Manual Low": (1, 2),
+    "Manual Normal": (1, 3),
+    "Manual High": (1, 4),
     "Auto": (0, None),      
     "Crowded": (2, None),
     "Refresh": (3, None),
@@ -43,7 +45,6 @@ class VSR300Select(SelectEntity):
 
     @property
     def device_info(self):
-        """Link this entity to the VSR300 Device."""
         return {
             "identifiers": {(DOMAIN, f"vsr300_{self._slave}")},
             "name": "Systemair VSR300",
@@ -52,21 +53,16 @@ class VSR300Select(SelectEntity):
         }
 
     async def async_select_option(self, option: str) -> None:
-        """Set Mode and Speed using working Modbus constants."""
+        """Set Mode and Speed."""
         mode_val, speed_val = VENTILATION_MODES[option]
-
         try:
-            # 1. Write User Mode (1161)
-            await self._hub.async_pb_call(
-                self._slave, 1161, mode_val, CALL_TYPE_WRITE_REGISTER
-            )
+            # 1. Write User Mode Command (1161)
+            await self._hub.async_pb_call(self._slave, 1161, mode_val, CALL_TYPE_WRITE_REGISTER)
             
             # 2. Write Fan Speed (1130) if required
             if speed_val is not None:
-                await asyncio.sleep(1.0) # Small delay for the unit to process mode change
-                await self._hub.async_pb_call(
-                    self._slave, 1130, speed_val, CALL_TYPE_WRITE_REGISTER
-                )
+                await asyncio.sleep(0.5) 
+                await self._hub.async_pb_call(self._slave, 1130, speed_val, CALL_TYPE_WRITE_REGISTER)
             
             self._attr_current_option = option
             self.async_write_ha_state()
@@ -74,36 +70,29 @@ class VSR300Select(SelectEntity):
             _LOGGER.error("Failed to set select mode %s: %s", option, e)
 
     async def async_update(self):
-        """Sync the select list with status register 1160."""
+        """Sync the select list with status register 1160 and speed 1130."""
         try:
-            # Read Current Status (1160) and Current Speed (1130)
-            res_mode = await self._hub.async_pb_call(self._slave, 1160, 1, CALL_TYPE_REGISTER_HOLDING)
+            # 1160 is an INPUT register on VSR300
+            res_mode = await self._hub.async_pb_call(self._slave, 1160, 1, CALL_TYPE_REGISTER_INPUT)
+            # 1130 is a HOLDING register
             res_speed = await self._hub.async_pb_call(self._slave, 1130, 1, CALL_TYPE_REGISTER_HOLDING)
 
             if res_mode and hasattr(res_mode, 'registers'):
-                curr_mode = res_mode.registers[0]
-                
-                # Check if we are in Manual Status (usually 1 on register 1160)
-                if curr_mode == 1:
-                    if res_speed and hasattr(res_speed, 'registers'):
-                        curr_speed = res_speed.registers[0]
-                        speed_map = {2: "Low", 3: "Normal", 4: "High"}
-                        self._attr_current_option = speed_map.get(curr_speed, "Low")
-                else:
-                    # Map the other status codes to your list options
-                    # Note: These must match the KEYS in VENTILATION_MODES exactly
-                    mode_map = {
-                        0: "Auto",
-                        2: "Crowded",
-                        3: "Refresh",
-                        4: "Fireplace",
-                        5: "Away",
-                        6: "Holiday"
-                    }
-                    self._attr_current_option = mode_map.get(curr_mode)
+                mode_val = res_mode.registers[0]
+                cmd_val = res_speed.registers[0] if res_speed and hasattr(res_speed, 'registers') else None
 
-            # If the current option is still None, it means the unit is in a state
-            # not represented in our simple list (like 'Cooker Hood' or 'Fire')
-            
+                # Logic to map hardware state back to one of our dropdown options
+                if mode_val == 0:
+                    self._attr_current_option = "Auto"
+                elif mode_val == 1:
+                    speed_map = {2: "Manual Low", 3: "Manual Normal", 4: "Manual High"}
+                    self._attr_current_option = speed_map.get(cmd_val, "Manual Normal")
+                else:
+                    mode_map = {
+                        2: "Crowded", 3: "Refresh", 4: "Fireplace", 
+                        5: "Away", 6: "Holiday"
+                    }
+                    self._attr_current_option = mode_map.get(mode_val)
+
         except Exception as e:
             _LOGGER.error("Select update failed: %s", e)
