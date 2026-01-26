@@ -9,15 +9,15 @@ _LOGGER = logging.getLogger(__name__)
 
 # Action Mapping: (Name, 1161_Mode, 1130_Speed or None)
 VENT_ACTIONS = {
-    "Set Normal Mode": (2, 3),
-    "Set Low Speed": (2, 2),
-    "Set High Speed": (2, 4),
+    "Activate Normal Mode": (2, 3),
+    "Activate Low Speed": (2, 2),
+    "Activate High Speed": (2, 4),
     "Activate Fireplace": (5, None),
     "Activate Refresh": (4, None),
     "Activate Crowded": (3, None),
     "Activate Away": (6, None),
     "Activate Auto": (1, None),
-    "Stop Ventilation": (0, None),
+    "Activate Stop": (0, None),
 }
 
 async def async_setup_entry(hass, entry, async_add_entities):

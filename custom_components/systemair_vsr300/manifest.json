@@ -2,6 +2,7 @@
   "domain": "systemair_vsr300",
   "name": "Systemair VSR300",
   "codeowners": ["@Ztaeyn"],
+  "icon": "mdi:hvac",
   "config_flow": true,
   "dependencies": ["modbus"],
   "after_dependencies": ["modbus"],
