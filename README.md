@@ -1,6 +1,5 @@
 # Systemair VSR300 Integration for Home Assistant
 
-## It's work in progress - But usable. I'm looking for bugs and things to improve.
 
 ## Information
 I wanted to try to make the former YAML package into a integration using Python, which I want to learn for fun. I code on PLC's for work, so I can read much of the python language, but I can't write it. I've used Gemini  to help me convert my YAML code, so this is technically vibe-coding.
@@ -9,12 +8,18 @@ It's been fun, and I hope to use it as motivation to finish a python course.
 ## What it does
 If you have not connected your VSR300 to Home Assistant before, this integration lets you control and monitor the system.
 Cut short, it lets you
+* Control what you normally see on the VSR Care HMI screen
 * Set fan modes
 * Configure setpoints for duration
 * Configure fan speeds
 * See filter replacemnt
 * See alarms
 
+### Device elements
+The device added by the integration is separated into
+* Controls - The typical daily usage
+* Sensors - Information, non controllable
+* Configuration - Elements you normally don't change more than once.
 
 
 ## Installation
@@ -40,6 +45,7 @@ I use a Elfin EW11 modbus adapter from AliExpress.
 
 ## issues
 * Minor issue: Not reading fan state Cooker Hood. 
+* 
 
 ## todo
 * Add norwegian language. I did a small test but did not get it to switch.
