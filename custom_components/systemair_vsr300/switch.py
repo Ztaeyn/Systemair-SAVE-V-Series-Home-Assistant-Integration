@@ -18,6 +18,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
     # Eco Mode has category None so it stays on the main card.
     switches = [
         ("Eco Mode", 2504, "mdi:leaf", None),
+        ("Free Cooling", 4100, "mdi:snowflake-thermometer", None),
         ("Fan Manual Stop Allowed", 1352, "mdi:fan-off", EntityCategory.CONFIG),
     ]
 

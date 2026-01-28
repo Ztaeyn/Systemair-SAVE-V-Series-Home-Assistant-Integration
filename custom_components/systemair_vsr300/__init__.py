@@ -13,7 +13,8 @@ PLATFORMS = [
     "button",
     "number",
     "switch",
-    "select"
+    "select",
+    "time"
 ]
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:

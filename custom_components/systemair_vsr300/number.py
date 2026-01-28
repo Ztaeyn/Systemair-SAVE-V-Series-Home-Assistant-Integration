@@ -60,6 +60,13 @@ VSR300_NUMBERS = [
     ("Moisture Extraction Setpoint", 2202, 10, 90, 1, "%", 1, "mdi:water-percent", EntityCategory.CONFIG),
     # --- System / Maintenance (Category: CONFIG) ---
     ("Filter Change Interval", 7000, 1, 12, 1, "mo", 1, "mdi:calendar-clock", EntityCategory.CONFIG),
+
+    # --- Free Cooling (Category: CONFIG) ---
+    ("Free Cooling Outdoor Day Min Temp Start", 4101, 12.0, 30.0, 0.5, "°C", 10, "mdi:sun-thermometer", EntityCategory.CONFIG),
+    ("Free Cooling Outdoor Night High Limit", 4102, 7.0, 30.0, 0.5, "°C", 10, "mdi:sun-thermometer", EntityCategory.CONFIG),
+    ("Free Cooling Outdoor Night Low Limit", 4103, 7.0, 30.0, 0.5, "°C", 10, "mdi:sun-thermometer", EntityCategory.CONFIG),
+    ("Free Cooling Indoor Day Low Limit", 4104, 12.0, 30.0, 0.5, "°C", 10, "mdi:sun-thermometer", EntityCategory.CONFIG),
+
 ]
 
 async def async_setup_entry(hass, entry, async_add_entities):

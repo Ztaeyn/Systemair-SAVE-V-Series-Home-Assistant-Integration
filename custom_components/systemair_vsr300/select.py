@@ -70,6 +70,10 @@ async def async_setup_entry(hass, entry, async_add_entities):
         # Fireplace Levels (Config)
         VSR300GeneralSelect(hub, entry.data, "Fireplace Airflow Supply Level", 1138, AIRFLOW_LEVELS, "mdi:gauge-full", EntityCategory.CONFIG),
         VSR300GeneralSelect(hub, entry.data, "Fireplace Airflow Extract Level", 1139, AIRFLOW_LEVELS, "mdi:gauge-full", EntityCategory.CONFIG),
+
+        # Free Cooling Levels (Config)
+        VSR300GeneralSelect(hub, entry.data, "Free Cooling Supply Level", 4111, AIRFLOW_LEVELS, "mdi:gauge-full", EntityCategory.CONFIG),
+        VSR300GeneralSelect(hub, entry.data, "Free Cooling Extract Level", 4112, AIRFLOW_LEVELS, "mdi:gauge-full", EntityCategory.CONFIG),
         
         # Away Levels (Config)
         VSR300GeneralSelect(hub, entry.data, "Away Airflow Supply Level", 1140, AWAY_LEVELS, "mdi:fan-minus", EntityCategory.CONFIG),
