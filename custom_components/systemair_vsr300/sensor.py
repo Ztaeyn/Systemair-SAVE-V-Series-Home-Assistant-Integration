@@ -34,14 +34,19 @@ VSR300_SENSORS = [
     ("Supply Air Fan Speed", 14000, None, "%", 1.0, "mdi:fan", SensorStateClass.MEASUREMENT),
     ("Extractor Air Fan Speed", 14001, None, "%", 1.0, "mdi:fan", SensorStateClass.MEASUREMENT),
 
-    # Other
-    ("Heat Recovery", 14102, None, "%", 1.0, "mdi:sync", SensorStateClass.MEASUREMENT),
+    # Logic-Heavy Sensors (These trigger the special blocks in async_update)
     ("Current Fan Mode", 1160, None, None, 1.0, "mdi:air-conditioner", None),
     ("Mode Time Remaining", 1111, None, None, 1.0, "mdi:timer-sand", None), 
+    
+    # Filter Management
+    ("Filter Time Remaining", 7005, None, "days", 1.0, "mdi:clock-end", SensorStateClass.MEASUREMENT),
+    #("Last Filter Replacement", 7002, SensorDeviceClass.TIMESTAMP, None, 1.0, "mdi:calendar-check", None), #Displays 23 years instead of 9 months. todo
+    ("Filter Alarm Code", 15141, None, None, 1.0, "mdi:alert-circle", None),
+
+    # Standard Sensors
+    ("Heat Recovery", 14102, None, "%", 1.0, "mdi:sync", SensorStateClass.MEASUREMENT),
     ("Summer Winter Operation", 1038, None, None, 1, "mdi:sun-snowflake-variant", None),
     ("TRIAC Manual Override", 2148, None, "%", 1.0, "mdi:heating-coil", SensorStateClass.MEASUREMENT),
-    ("Filter Time Remaining", 7005, None, None, 1.0, "mdi:clock-end", SensorStateClass.MEASUREMENT),
-    ("Filter Alarm Code", 7006, None, None, 1.0, "mdi:alert-circle", None),
     ("Manual Fan Speed Setting", 1130, None, None, 1.0, "mdi:cog-clockwise", None),
 ]
 
@@ -131,20 +136,23 @@ class VSR300GenericSensor(SensorEntity):
                         self._state = mode_map.get(mode_val, "invalid state")
                 return
 
-            # --- Handle Filter Time ---
+            # --- Handle Filter Time (32-bit: 7004 Low, 7005 High) ---
             if self._register == 7005:
-                res_high = await self._hub.async_pb_call(self._slave, 7005, 1, CALL_TYPE_REGISTER_HOLDING)
-                res_low = await self._hub.async_pb_call(self._slave, 7006, 1, CALL_TYPE_REGISTER_HOLDING)
-                if res_high and res_low and hasattr(res_high, 'registers'):
-                    total_seconds = (res_high.registers[0] << 16) + res_low.registers[0]
-                    days = total_seconds / 86400
-                    if days > 30:
-                        self._state = round(days / 30.4, 1)
-                        self._attr_native_unit_of_measurement = "mo"
-                    else:
-                        self._state = int(days)
-                        self._attr_native_unit_of_measurement = "days"
+                # Read 2 registers starting at 7004 (gets 7004 and 7005)
+                result = await self._hub.async_pb_call(self._slave, 7004, 2, CALL_TYPE_REGISTER_HOLDING)
+                
+                if result and hasattr(result, 'registers') and len(result.registers) >= 2:
+                    # In Systemair logic: [0] is Low (7004), [1] is High (7005)
+                    low = result.registers[0]
+                    high = result.registers[1]
+                    
+                    total_seconds = (high << 16) + low
+                    
+                    # Convert to days
+                    self._state = round(total_seconds / 86400, 1)
+                    self._attr_native_unit_of_measurement = "days"
                 return
+
 
             # --- Standard Update (Holding Registers) ---
             result = await self._hub.async_pb_call(self._slave, self._register, 1, CALL_TYPE_REGISTER_HOLDING)
@@ -155,7 +163,7 @@ class VSR300GenericSensor(SensorEntity):
                 elif self._register == 1130:
                     speed_map = {1: "Off", 2: "Low", 3: "Normal", 4: "High"}
                     self._state = speed_map.get(val, f"Level {val}")
-                elif self._register == 7006: 
+                elif self._register == 15141: 
                     self._state = {0: "No Alarm", 1: "Warning", 2: "Overdue"}.get(val, val)
                 else:
                     float_val = float(val)
