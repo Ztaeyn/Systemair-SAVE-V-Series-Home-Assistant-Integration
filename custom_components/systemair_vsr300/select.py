@@ -97,8 +97,8 @@ async def async_setup_entry(hass, entry, async_add_entities):
         VSR300GeneralSelect(hub, entry.data, "Temp Control Mode", 2030, TEMP_CONTROL_MODES, "mdi:tune-vertical", EntityCategory.CONFIG),
  
         # Weekly Schedule Levels (Config)
-        VSR300GeneralSelect(hub, entry.data, "Scheduled Airflow Supply Level", 5059, SCHEDULE_LEVELS, "mdi:gauge-full", EntityCategory.CONFIG), 
-        VSR300GeneralSelect(hub, entry.data, "Scheduled Airflow Extract Level", 5060, SCHEDULE_LEVELS, "mdi:gauge-full", EntityCategory.CONFIG) 
+        VSR300GeneralSelect(hub, entry.data, "Scheduled Airflow Fan Level", 5059, SCHEDULE_LEVELS, "mdi:gauge-full", EntityCategory.CONFIG), 
+        VSR300GeneralSelect(hub, entry.data, "Unscheduled Airflow Fan Level", 5060, SCHEDULE_LEVELS, "mdi:gauge-full", EntityCategory.CONFIG) 
     ])
 
 # --- ENTITY CLASSES ---
