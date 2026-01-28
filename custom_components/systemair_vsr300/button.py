@@ -27,12 +27,11 @@ async def async_setup_entry(hass, entry, async_add_entities):
         _LOGGER.error("Hub VSR300 not found during button setup")
         return
 
-    entities = []
-    for name, (mode, speed) in VENT_ACTIONS.items():
-        entities.append(VSR300Button(hub, entry.data, name, mode, speed))
-    
-    # Filter Reset (Register 12122)
-    entities.append(VSR300Button(hub, entry.data, "Reset Filter Timer", 1, None, 12122))
+    # Create only the buttons defined in VENT_ACTIONS
+    entities = [
+        VSR300Button(hub, entry.data, name, mode, speed)
+        for name, (mode, speed) in VENT_ACTIONS.items()
+    ]
     
     async_add_entities(entities)
 

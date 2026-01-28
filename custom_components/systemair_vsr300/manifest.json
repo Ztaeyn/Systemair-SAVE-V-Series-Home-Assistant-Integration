@@ -8,5 +8,5 @@
   "after_dependencies": ["modbus"],
   "documentation": "https://www.home-assistant.io",
   "iot_class": "local_polling",
-  "version": "1.0.1"
+  "version": "1.0.0"
 }

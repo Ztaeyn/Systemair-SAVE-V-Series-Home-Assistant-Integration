@@ -1,6 +1,7 @@
 import asyncio
 import logging
 from homeassistant.components.select import SelectEntity
+from homeassistant.helpers.entity import EntityCategory
 from homeassistant.components.modbus.const import (
     CALL_TYPE_WRITE_REGISTER,
     CALL_TYPE_REGISTER_HOLDING,
@@ -30,18 +31,18 @@ AIRFLOW_LEVELS = {
     "Maximum": 5
 }
 
-TEMP_CONTROL_MODES = {
-    "Supply": 0,
-    "Room": 1,
-    "Extract": 2
-}
-
 # 0: Off (requires OFF switch enabled), 1: Min, 2: Low, 3: Normal
 AWAY_LEVELS = {
     "Off": 0,
     "Minimum": 1,
     "Low": 2,
     "Normal": 3
+}
+
+TEMP_CONTROL_MODES = {
+    "Supply": 0,
+    "Room": 1,
+    "Extract": 2
 }
 
 # --- SETUP ---
@@ -54,31 +55,39 @@ async def async_setup_entry(hass, entry, async_add_entities):
         _LOGGER.error("Hub VSR300 not found during select setup")
         return
         
-    # We create three different select entities here
     async_add_entities([
+        # Main Control
         VSR300VentModeSelect(hub, entry.data, "Ventilation Mode"),
-        #Airflow levels
-        VSR300GeneralSelect(hub, entry.data, "Crowded Airflow Supply Level", 1134, AIRFLOW_LEVELS, "mdi:gauge-full"),
-        VSR300GeneralSelect(hub, entry.data, "Crowded Airflow Extract Level", 1135, AIRFLOW_LEVELS, "mdi:gauge-full"),
-        VSR300GeneralSelect(hub, entry.data, "Refresh Airflow Supply Level", 1136, AIRFLOW_LEVELS, "mdi:gauge-full"),
-        VSR300GeneralSelect(hub, entry.data, "Refresh Airflow Extract Level", 1137, AIRFLOW_LEVELS, "mdi:gauge-full"),
-        VSR300GeneralSelect(hub, entry.data, "Fireplace Airflow Supply Level", 1138, AIRFLOW_LEVELS, "mdi:gauge-full"),
-        VSR300GeneralSelect(hub, entry.data, "Fireplace Airflow Extract Level", 1139, AIRFLOW_LEVELS, "mdi:gauge-full"),
-        #Airflow "away"
-        VSR300GeneralSelect(hub, entry.data, "Away Airflow Supply Level", 1140, AWAY_LEVELS, "mdi:gauge-full"),
-        VSR300GeneralSelect(hub, entry.data, "Away Airflow Extract Level", 1141, AWAY_LEVELS, "mdi:gauge-full"),
-        VSR300GeneralSelect(hub, entry.data, "Holiday Airflow Supply Level", 1142, AWAY_LEVELS, "mdi:gauge-full"),
-        VSR300GeneralSelect(hub, entry.data, "Holiday Airflow Extract Level", 1143, AWAY_LEVELS, "mdi:gauge-full"),
 
+        # Crowded Levels (Config)
+        VSR300GeneralSelect(hub, entry.data, "Crowded Airflow Supply Level", 1134, AIRFLOW_LEVELS, "mdi:gauge-full", EntityCategory.CONFIG),
+        VSR300GeneralSelect(hub, entry.data, "Crowded Airflow Extract Level", 1135, AIRFLOW_LEVELS, "mdi:gauge-full", EntityCategory.CONFIG),
+        
+        # Refresh Levels (Config)
+        VSR300GeneralSelect(hub, entry.data, "Refresh Airflow Supply Level", 1136, AIRFLOW_LEVELS, "mdi:gauge-full", EntityCategory.CONFIG),
+        VSR300GeneralSelect(hub, entry.data, "Refresh Airflow Extract Level", 1137, AIRFLOW_LEVELS, "mdi:gauge-full", EntityCategory.CONFIG),
+        
+        # Fireplace Levels (Config)
+        VSR300GeneralSelect(hub, entry.data, "Fireplace Airflow Supply Level", 1138, AIRFLOW_LEVELS, "mdi:gauge-full", EntityCategory.CONFIG),
+        VSR300GeneralSelect(hub, entry.data, "Fireplace Airflow Extract Level", 1139, AIRFLOW_LEVELS, "mdi:gauge-full", EntityCategory.CONFIG),
+        
+        # Away Levels (Config)
+        VSR300GeneralSelect(hub, entry.data, "Away Airflow Supply Level", 1140, AWAY_LEVELS, "mdi:fan-minus", EntityCategory.CONFIG),
+        VSR300GeneralSelect(hub, entry.data, "Away Airflow Extract Level", 1141, AWAY_LEVELS, "mdi:fan-minus", EntityCategory.CONFIG),
+        
+        # Holiday Levels (Config)
+        VSR300GeneralSelect(hub, entry.data, "Holiday Airflow Supply Level", 1142, AWAY_LEVELS, "mdi:fan-off", EntityCategory.CONFIG),
+        VSR300GeneralSelect(hub, entry.data, "Holiday Airflow Extract Level", 1143, AWAY_LEVELS, "mdi:fan-off", EntityCategory.CONFIG),
 
-        VSR300GeneralSelect(hub, entry.data, "Temp Control Mode", 2030, TEMP_CONTROL_MODES, "mdi:tune-vertical")
+        # System Config
+        VSR300GeneralSelect(hub, entry.data, "Temp Control Mode", 2030, TEMP_CONTROL_MODES, "mdi:tune-vertical", EntityCategory.CONFIG)
     ])
 
 # --- ENTITY CLASSES ---
 
 class VSR300GeneralSelect(SelectEntity):
-    """Generic Select for single-register mappings (Crowded Level, Temp Control)."""
-    def __init__(self, hub, config, name, register, mapping, icon):
+    """Generic Select for single-register mappings."""
+    def __init__(self, hub, config, name, register, mapping, icon, category=None):
         self._hub = hub
         self._slave = config.get(CONF_SLAVE, 1)
         self._register = register
@@ -88,27 +97,41 @@ class VSR300GeneralSelect(SelectEntity):
         self._attr_name = name
         self._attr_options = list(mapping.keys())
         self._attr_icon = icon
+        self._attr_entity_category = category
         self._attr_unique_id = f"vsr300_{self._slave}_select_{register}"
         self._attr_current_option = None
 
     @property
     def device_info(self):
-        return {"identifiers": {(DOMAIN, f"vsr300_{self._slave}")}, "name": "Systemair VSR300"}
+        return {
+            "identifiers": {(DOMAIN, f"vsr300_{self._slave}")},
+            "name": "Systemair VSR300",
+            "manufacturer": "Systemair",
+            "model": "SAVE VSR300",
+        }
 
     async def async_select_option(self, option: str) -> None:
         val = self._mapping.get(option)
         if val is not None:
-            await self._hub.async_pb_call(self._slave, self._register, val, CALL_TYPE_WRITE_REGISTER)
-            self._attr_current_option = option
-            self.async_write_ha_state()
+            result = await self._hub.async_pb_call(self._slave, self._register, val, CALL_TYPE_WRITE_REGISTER)
+            if result:
+                self._attr_current_option = option
+                self.async_write_ha_state()
 
     async def async_update(self):
-        res = await self._hub.async_pb_call(self._slave, self._register, 1, CALL_TYPE_REGISTER_HOLDING)
-        if res and hasattr(res, 'registers'):
-            self._attr_current_option = self._inv_mapping.get(res.registers[0], "Unknown")
+        try:
+            res = await self._hub.async_pb_call(self._slave, self._register, 1, CALL_TYPE_REGISTER_HOLDING)
+            if res and hasattr(res, 'registers'):
+                val = res.registers[0]
+                self._attr_current_option = self._inv_mapping.get(val, "Unknown")
+            else:
+                self._attr_current_option = None
+        except Exception as e:
+            _LOGGER.error("Update failed for select %s: %s", self._attr_name, e)
+            self._attr_current_option = None
 
 class VSR300VentModeSelect(SelectEntity):
-    """Your original complex Mode + Speed select."""
+    """VSR300 Mode + Speed combined control."""
     def __init__(self, hub, config, name):
         self._hub = hub
         self._slave = config.get(CONF_SLAVE, 1)
@@ -119,7 +142,12 @@ class VSR300VentModeSelect(SelectEntity):
 
     @property
     def device_info(self):
-        return {"identifiers": {(DOMAIN, f"vsr300_{self._slave}")}, "name": "Systemair VSR300"}
+        return {
+            "identifiers": {(DOMAIN, f"vsr300_{self._slave}")},
+            "name": "Systemair VSR300",
+            "manufacturer": "Systemair",
+            "model": "SAVE VSR300",
+        }
 
     async def async_select_option(self, option: str) -> None:
         mode_val, speed_val = VENTILATION_MODES[option]
@@ -131,7 +159,7 @@ class VSR300VentModeSelect(SelectEntity):
             self._attr_current_option = option
             self.async_write_ha_state()
         except Exception as e:
-            _LOGGER.error("Failed to set select mode %s: %s", option, e)
+            _LOGGER.error("Failed to set ventilation mode %s: %s", option, e)
 
     async def async_update(self):
         try:
@@ -151,4 +179,4 @@ class VSR300VentModeSelect(SelectEntity):
                     mode_map = {2: "Crowded", 3: "Refresh", 4: "Fireplace", 5: "Away", 6: "Holiday"}
                     self._attr_current_option = mode_map.get(mode_val)
         except Exception as e:
-            _LOGGER.error("Select update failed: %s", e)
+            _LOGGER.error("Ventilation mode update failed: %s", e)
