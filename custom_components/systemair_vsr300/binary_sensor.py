@@ -22,7 +22,7 @@ VSR300_BOOLEANS = [
     # STATUS / INPUTS
     ("Extractor Hood Status", 12305, BinarySensorDeviceClass.RUNNING, "mdi:stove"),
     ("TRIAC Control Signal", 14380, BinarySensorDeviceClass.POWER, "mdi:sine-wave"),
-    ("Maintenance Mode Active", 15000, None, "mdi:wrench-clock"), # Example generic boolean
+    ("Maintenance Mode Active", 15000, None, "mdi:wrench-clock"), 
 ]
 
 async def async_setup_entry(hass, entry, async_add_entities):

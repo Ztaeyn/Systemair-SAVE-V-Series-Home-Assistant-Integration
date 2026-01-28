@@ -13,7 +13,6 @@ async def async_setup_entry(hass, entry, async_add_entities):
     hub = get_hub(hass, "VSR300")
     config = entry.data
     
-    # Add switches here. 
     switches = [
         ("Eco Mode", 2504, "mdi:leaf"),
         ("Fan Manual Stop Allowed", 1352, "mdi:fan-off"),

@@ -28,10 +28,22 @@ I did not manage for now to make it install without editing files, as it seems I
 5. Now go to Devices and add new integration and search for Systemair VSR300 and add it.
 6. It should now be available as a device under Home Assistant.
 
+<img width="1124" height="776" alt="image" src="https://github.com/user-attachments/assets/616d7609-bdff-4be0-9805-427637dd1d77" />
+
 Note. If you previously used the YAML package you will have to remove it first, and the resulting broken entities. I used the Spook integration for removing dead entities. Use at your own risk.
 
 
 ## Hardware 
-I use a Elfin EW11 modbus adapter from AliExpress
+I use a Elfin EW11 modbus adapter from AliExpress.
 
-<img width="1124" height="776" alt="image" src="https://github.com/user-attachments/assets/616d7609-bdff-4be0-9805-427637dd1d77" />
+
+
+## issues
+* Minor issue: Not reading fan state Cooker Hood. 
+
+## todo
+* Add norwegian language. I did a small test but did not get it to switch.
+* Perhaps rename entities for grouping? Will mess up for users, and a prefix is not pretty. I guess not unless wanted.
+* Add free cooling mode
+* add week schedule
+* add more sensors, alarms.
