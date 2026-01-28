@@ -21,6 +21,9 @@ The device added by the integration is separated into
 * Sensors - Information, non controllable
 * Configuration - Elements you normally don't change more than once.
 
+* ### Free Cooling
+* Set temperature limits for start/stop, time schedule.
+
 
 ## Installation
 I did not manage for now to make it install without editing files, as it seems I would have to provide the modbus interface myself. So for now you need to add the modbus interface to the configuration.yaml.
@@ -50,6 +53,5 @@ I use a Elfin EW11 modbus adapter from AliExpress.
 ## todo
 * Add norwegian language. I did a small test but did not get it to switch.
 * Perhaps rename entities for grouping? Will mess up for users, and a prefix is not pretty. I guess not unless wanted.
-* Add free cooling mode
 * add week schedule
 * add more sensors, alarms.
