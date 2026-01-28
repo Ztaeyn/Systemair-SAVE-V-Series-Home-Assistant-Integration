@@ -21,6 +21,9 @@ The device added by the integration is separated into
 * Sensors - Information, non controllable
 * Configuration - Elements you normally don't change more than once.
 
+* ### Free Cooling
+* Set temperature limits for start/stop, time schedule.
+
 
 ## Installation
 I did not manage for now to make it install without editing files, as it seems I would have to provide the modbus interface myself. So for now you need to add the modbus interface to the configuration.yaml.
