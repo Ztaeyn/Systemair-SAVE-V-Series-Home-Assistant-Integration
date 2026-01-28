@@ -67,6 +67,10 @@ VSR300_NUMBERS = [
     ("Free Cooling Outdoor Night Low Limit", 4103, 7.0, 30.0, 0.5, "°C", 10, "mdi:sun-thermometer", EntityCategory.CONFIG),
     ("Free Cooling Indoor Day Low Limit", 4104, 12.0, 30.0, 0.5, "°C", 10, "mdi:sun-thermometer", EntityCategory.CONFIG),
 
+    # --- Weekly Schedule (Category: CONFIG) ---
+    ("Schedule Active - Temp Offset", 5000, -10.0, 0.0, 0.5, "°C", 10, "mdi:sun-thermometer", EntityCategory.CONFIG), 
+    ("Schedule Inactive - Temp Offset", 5001, -10.0, 0.0, 0.5, "°C", 10, "mdi:sun-thermometer", EntityCategory.CONFIG), 
+
 ]
 
 async def async_setup_entry(hass, entry, async_add_entities):

@@ -20,8 +20,47 @@ async def async_setup_entry(hass, entry, async_add_entities):
         return
         
     async_add_entities([
+        # Free Cooling
         VSR300Time(hub, entry.data, "Free Cooling Start Time", 4105, 4106),
-        VSR300Time(hub, entry.data, "Free Cooling End Time", 4107, 4108)
+        VSR300Time(hub, entry.data, "Free Cooling End Time", 4107, 4108),
+
+        #Weekly Schedule
+        VSR300Time(hub, entry.data, "Monday Period 1 Start", 5002, 5003),
+        VSR300Time(hub, entry.data, "Monday Period 1 End", 5004, 5005),
+        VSR300Time(hub, entry.data, "Monday Period 2 Start", 5006, 5007),
+        VSR300Time(hub, entry.data, "Monday Period 2 End", 5008, 5009),
+
+        VSR300Time(hub, entry.data, "Tuesday Period 1 Start", 5010, 5011),
+        VSR300Time(hub, entry.data, "Tuesday Period 1 End", 5012, 5013),
+        VSR300Time(hub, entry.data, "Tuesday Period 2 Start", 5014, 5015),
+        VSR300Time(hub, entry.data, "Tuesday Period 2 End", 5016, 5017),             
+
+        VSR300Time(hub, entry.data, "Wednesday Period 1 Start", 5018, 5019),
+        VSR300Time(hub, entry.data, "Wednesday Period 1 End", 5020, 5021),
+        VSR300Time(hub, entry.data, "Wednesday Period 2 Start", 5022, 5023),
+        VSR300Time(hub, entry.data, "Wednesday Period 2 End", 5024, 5025),             
+
+        VSR300Time(hub, entry.data, "Thursday Period 1 Start", 5026, 5027),
+        VSR300Time(hub, entry.data, "Thursday Period 1 End", 5028, 5029),
+        VSR300Time(hub, entry.data, "Thursday Period 2 Start", 5030, 5031),
+        VSR300Time(hub, entry.data, "Thursday Period 2 End", 5032, 5033),             
+
+        VSR300Time(hub, entry.data, "Friday Period 1 Start", 5034, 5035),
+        VSR300Time(hub, entry.data, "Friday Period 1 End", 5036, 5037),
+        VSR300Time(hub, entry.data, "Friday Period 2 Start", 5038, 5039),
+        VSR300Time(hub, entry.data, "Friday Period 2 End", 5040, 5041),             
+
+        VSR300Time(hub, entry.data, "Saturday Period 1 Start", 5042, 5043),
+        VSR300Time(hub, entry.data, "Saturday Period 1 End", 5044, 5045),
+        VSR300Time(hub, entry.data, "Saturday Period 2 Start", 5046, 5047),
+        VSR300Time(hub, entry.data, "Saturday Period 2 End", 5048, 5049),             
+
+        VSR300Time(hub, entry.data, "Sunday Period 1 Start", 5050, 5051),
+        VSR300Time(hub, entry.data, "Sunday Period 1 End", 5052, 5053),
+        VSR300Time(hub, entry.data, "Sunday Period 2 Start", 5054, 5055),
+        VSR300Time(hub, entry.data, "Sunday Period 2 End", 5056, 5057),             
+
+
     ])
 
 class VSR300Time(TimeEntity):

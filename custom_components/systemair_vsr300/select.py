@@ -38,6 +38,16 @@ AWAY_LEVELS = {
     "Low": 2,
     "Normal": 3
 }
+# 1: Off available if Manual Fan Stop is enabled
+# 2: Low, 3: Normal, 4: High, 
+# 5: Demand. available if demand control active or external fan control enabled enabled.
+SCHEDULE_LEVELS = {
+    "Off": 1,
+    "Low": 2,
+    "Normal": 3,
+    "High": 4,
+    "Demand": 5
+}
 
 TEMP_CONTROL_MODES = {
     "Supply": 0,
@@ -84,7 +94,11 @@ async def async_setup_entry(hass, entry, async_add_entities):
         VSR300GeneralSelect(hub, entry.data, "Holiday Airflow Extract Level", 1143, AWAY_LEVELS, "mdi:fan-off", EntityCategory.CONFIG),
 
         # System Config
-        VSR300GeneralSelect(hub, entry.data, "Temp Control Mode", 2030, TEMP_CONTROL_MODES, "mdi:tune-vertical", EntityCategory.CONFIG)
+        VSR300GeneralSelect(hub, entry.data, "Temp Control Mode", 2030, TEMP_CONTROL_MODES, "mdi:tune-vertical", EntityCategory.CONFIG),
+ 
+        # Weekly Schedule Levels (Config)
+        VSR300GeneralSelect(hub, entry.data, "Scheduled Airflow Supply Level", 5059, SCHEDULE_LEVELS, "mdi:gauge-full", EntityCategory.CONFIG), 
+        VSR300GeneralSelect(hub, entry.data, "Scheduled Airflow Extract Level", 5060, SCHEDULE_LEVELS, "mdi:gauge-full", EntityCategory.CONFIG) 
     ])
 
 # --- ENTITY CLASSES ---
