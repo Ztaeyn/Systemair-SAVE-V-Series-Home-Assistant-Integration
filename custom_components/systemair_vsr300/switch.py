@@ -20,6 +20,35 @@ async def async_setup_entry(hass, entry, async_add_entities):
         ("Eco Mode", 2504, "mdi:leaf", None),
         ("Free Cooling", 4100, "mdi:snowflake-thermometer", None),
         ("Fan Manual Stop Allowed", 1352, "mdi:fan-off", EntityCategory.CONFIG),
+
+        # Monday
+        ("Monday Period 1 Enabled", 5100, "mdi:calendar-check", None),
+        ("Monday Period 2 Enabled", 5101, "mdi:calendar-check", None),
+
+        # Tuesday
+        ("Tuesday Period 1 Enabled", 5102, "mdi:calendar-check", None),
+        ("Tuesday Period 2 Enabled", 5103, "mdi:calendar-check", None),
+
+        # Wednesday
+        ("Wednesday Period 1 Enabled", 5104, "mdi:calendar-check", None),
+        ("Wednesday Period 2 Enabled", 5105, "mdi:calendar-check", None),
+
+        # Thursday
+        ("Thursday Period 1 Enabled", 5106, "mdi:calendar-check", None),
+        ("Thursday Period 2 Enabled", 5107, "mdi:calendar-check", None),
+
+        # Friday
+        ("Friday Period 1 Enabled", 5108, "mdi:calendar-check", None),
+        ("Friday Period 2 Enabled", 5109, "mdi:calendar-check", None),
+
+        # Saturday
+        ("Saturday Period 1 Enabled", 5110, "mdi:calendar-check", None),
+        ("Saturday Period 2 Enabled", 5111, "mdi:calendar-check", None),
+
+        # Sunday
+        ("Sunday Period 1 Enabled", 5112, "mdi:calendar-check", None),
+        ("Sunday Period 2 Enabled", 5113, "mdi:calendar-check", None),  
+
     ]
 
     entities = [VSR300Switch(hub, config, *s) for s in switches]

@@ -22,7 +22,7 @@ VSR300_BOOLEANS = [
     # STATUS / INPUTS (Main Card)
     ("Extractor Hood Status", 12305, BinarySensorDeviceClass.RUNNING, "mdi:stove", None),
     ("Free Cooling Active", 4110, BinarySensorDeviceClass.RUNNING, "mdi:snowflake-check", None),
-    
+
     # SYSTEM STATUS (Diagnostic category)
     ("TRIAC Control Signal", 14380, BinarySensorDeviceClass.POWER, "mdi:sine-wave", EntityCategory.DIAGNOSTIC),
     ("Maintenance Mode Active", 15000, None, "mdi:wrench-clock", EntityCategory.DIAGNOSTIC), 

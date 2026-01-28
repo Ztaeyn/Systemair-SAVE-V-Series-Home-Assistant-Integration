@@ -53,5 +53,4 @@ I use a Elfin EW11 modbus adapter from AliExpress.
 ## todo
 * Add norwegian language. I did a small test but did not get it to switch.
 * Perhaps rename entities for grouping? Will mess up for users, and a prefix is not pretty. I guess not unless wanted.
-* add week schedule
 * add more sensors, alarms.
