@@ -1,5 +1,5 @@
-# Systemair VSR300 Integration for Home Assistant
-
+# Systemair VSR300/400/500 Integration for Home Assistant
+Note: It it designed for VSR300 but will work for the two others as well. Extra sensors and tuning could be done.
 
 ## Information
 I wanted to try to make the former YAML package into a integration using Python, which I want to learn for fun. I code on PLC's for work, so I can read much of the python language, but I can't write it. I've used Gemini  to help me convert my YAML code, so this is technically vibe-coding.
