@@ -1,5 +1,6 @@
 {
-  "name": "Systemair VSR300 Modbus",
-  "render_readme": true,
-  "domains": ["sensor", "select", "binary_sensor", "climate"]
+  "name": "Systemair SAVE V-Series",
+  "content_type": "integration",
+  "domains": ["systemair"],
+  "render_readme": true
 }
