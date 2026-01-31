@@ -1,11 +1,11 @@
 {
-  "domain": "systemair_vsr",
-  "name": "Systemair Save VSR/VTR 300/400/500",
+  "domain": "systemair",
+  "name": "Systemair SAVE V-Series (VxR/VxT)",
   "codeowners": ["@Ztaeyn"],
   "icon": "mdi:hvac",
   "config_flow": true,
   "dependencies": ["modbus"],
-  "documentation": "https://www.home-assistant.io",
+  "documentation": "https://github.com/Ztaeyn/HA-VSR300-modbus-python-integration",
   "iot_class": "local_polling",
   "version": "1.3.0"
 }
