@@ -1,12 +1,11 @@
 {
-  "domain": "systemair_vsr300",
-  "name": "Systemair VSR300",
+  "domain": "systemair_vsr",
+  "name": "Systemair Save VSR 300/400/500",
   "codeowners": ["@Ztaeyn"],
   "icon": "mdi:hvac",
   "config_flow": true,
   "dependencies": ["modbus"],
-  "after_dependencies": ["modbus"],
   "documentation": "https://www.home-assistant.io",
   "iot_class": "local_polling",
-  "version": "1.2.0"
+  "version": "1.3.0"
 }
