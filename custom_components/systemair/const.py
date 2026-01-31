@@ -1,2 +1,2 @@
-DOMAIN = "systemair_vsr"
+DOMAIN = "systemair"
 CONF_SLAVE = "slave"

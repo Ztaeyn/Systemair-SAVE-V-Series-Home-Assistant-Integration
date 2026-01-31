@@ -1,10 +1,9 @@
 modbus:
-  - name: "VSR300"
+  - name: "save_hub"
     type: tcp
-    host: 192.168.10.101    #USER SPECIFIC
-    port: 8432              #USER SPECIFIC
-#Add one tiny sensor here just to keep the hub alive
+    host: 192.168.10.101  #user specific
+    port: 8432            #user specific
     sensors:
-      - name: "VSR300 Link"
+      - name: "VSR Link"
         address: 12101
         slave: 1
