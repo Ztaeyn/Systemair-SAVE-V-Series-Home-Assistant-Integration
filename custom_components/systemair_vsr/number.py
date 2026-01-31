@@ -1,7 +1,7 @@
 import logging
-from homeassistant.components.number import NumberEntity
+from homeassistant.components.number import NumberEntity, NumberMode
 from homeassistant.helpers.entity import EntityCategory
-from homeassistant.components.modbus import get_hub
+from homeassistant.const import CONF_MODEL, CONF_NAME
 from homeassistant.components.modbus.const import (
     CALL_TYPE_WRITE_REGISTER, 
     CALL_TYPE_REGISTER_HOLDING
@@ -11,7 +11,7 @@ from .const import DOMAIN, CONF_SLAVE
 _LOGGER = logging.getLogger(__name__)
 
 # List: (Name, Register, Min, Max, Step, Unit, Scale, Icon, Category)
-VSR300_NUMBERS = [
+VSR_NUMBERS = [
     # --- Main Controls (Category: None) ---
     ("Supply Air Setpoint", 2000, 12, 30, 0.5, "°C", 10, "mdi:thermometer-lines", None),
     ("Holiday Mode Duration", 1100, 1, 365, 1, "days", 1, "mdi:airplane-takeoff", None),
@@ -58,6 +58,7 @@ VSR300_NUMBERS = [
     ("Vacuum Supply Fan Setpoint", 1224, 500, 4500, 10, "rpm", 1, "mdi:vacuum", EntityCategory.CONFIG),
     ("Vacuum Exhaust Fan Setpoint", 1225, 500, 4500, 10, "rpm", 1, "mdi:vacuum", EntityCategory.CONFIG),
     ("Moisture Extraction Setpoint", 2202, 10, 90, 1, "%", 1, "mdi:water-percent", EntityCategory.CONFIG),
+
     # --- System / Maintenance (Category: CONFIG) ---
     ("Filter Change Interval", 7000, 1, 12, 1, "mo", 1, "mdi:calendar-clock", EntityCategory.CONFIG),
 
@@ -70,19 +71,39 @@ VSR300_NUMBERS = [
     # --- Weekly Schedule (Category: CONFIG) ---
     ("Schedule Active - Temp Offset", 5000, -10.0, 0.0, 0.5, "°C", 10, "mdi:sun-thermometer", EntityCategory.CONFIG), 
     ("Schedule Inactive - Temp Offset", 5001, -10.0, 0.0, 0.5, "°C", 10, "mdi:sun-thermometer", EntityCategory.CONFIG), 
-
 ]
 
 async def async_setup_entry(hass, entry, async_add_entities):
-    hub = get_hub(hass, "VSR300")
+    """Set up SaveVSR numbers from a config entry."""
     config = entry.data
-    entities = [VSR300NumberSetpoint(hub, config, *s) for s in VSR300_NUMBERS]
+    hub_name = config.get("hub_name", "modbus_hub")
+    
+    from homeassistant.components.modbus import get_hub
+    hub = get_hub(hass, hub_name)
+    
+    if hub is None:
+        _LOGGER.error("SaveVSR: Modbus hub '%s' not found for numbers", hub_name)
+        return
+
+    model = config.get(CONF_MODEL, "SAVE")
+    slave = config.get(CONF_SLAVE, 1)
+
+    entities = [
+        SaveVSRNumberSetpoint(hub, model, slave, *s) 
+        for s in VSR_NUMBERS
+    ]
     async_add_entities(entities, True)
 
-class VSR300NumberSetpoint(NumberEntity):
-    def __init__(self, hub, config, name, register, min_val, max_val, step, unit, scale, icon, category):
+class SaveVSRNumberSetpoint(NumberEntity):
+    """Generic SaveVSR Number Entity set to box mode."""
+    
+    _attr_has_entity_name = True
+    _attr_mode = NumberMode.BOX  # This forces the input box instead of slider
+
+    def __init__(self, hub, model, slave, name, register, min_val, max_val, step, unit, scale, icon, category):
         self._hub = hub
-        self._slave = config.get(CONF_SLAVE, 1)
+        self._slave = slave
+        self._model = model
         self._register = register
         self._scale = scale
         
@@ -93,31 +114,37 @@ class VSR300NumberSetpoint(NumberEntity):
         self._attr_native_unit_of_measurement = unit
         self._attr_icon = icon
         self._attr_entity_category = category
-        self._attr_unique_id = f"vsr300_number_{self._slave}_{register}"
+        self._attr_unique_id = f"{DOMAIN}_{slave}_num_{register}"
         self._attr_native_value = None
 
     @property
     def device_info(self):
         return {
-            "identifiers": {(DOMAIN, f"vsr300_{self._slave}")},
-            "name": "Systemair VSR300",
+            "identifiers": {(DOMAIN, f"{self._model}_{self._slave}")},
+            "name": f"Systemair {self._model}",
             "manufacturer": "Systemair",
-            "model": "SAVE VSR300",
+            "model": f"SAVE {self._model}",
         }
 
     async def async_set_native_value(self, value: float) -> None:
-        modbus_value = int(value * self._scale)
-        if modbus_value < 0:
-            modbus_value += 65536
+        """Handle user input."""
+        try:
+            modbus_value = int(value * self._scale)
+            
+            # Handle negative values
+            if modbus_value < 0:
+                modbus_value += 65536
 
-        result = await self._hub.async_pb_call(
-            self._slave, self._register, modbus_value, CALL_TYPE_WRITE_REGISTER
-        )
-        if result:
+            await self._hub.async_pb_call(
+                self._slave, self._register, modbus_value, CALL_TYPE_WRITE_REGISTER
+            )
             self._attr_native_value = value
             self.async_write_ha_state()
+        except Exception as e:
+            _LOGGER.error("SaveVSR: Set failed for %s: %s", self._attr_name, e)
 
     async def async_update(self):
+        """Fetch current value."""
         try:
             result = await self._hub.async_pb_call(
                 self._slave, self._register, 1, CALL_TYPE_REGISTER_HOLDING
@@ -130,5 +157,4 @@ class VSR300NumberSetpoint(NumberEntity):
             else:
                 self._attr_native_value = None
         except Exception as e:
-            _LOGGER.error("Update failed for %s: %s", self._attr_name, e)
-            self._attr_native_value = None
+            _LOGGER.error("SaveVSR: Update failed for %s: %s", self._attr_name, e)
