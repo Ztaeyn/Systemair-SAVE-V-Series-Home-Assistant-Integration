@@ -1,5 +1,11 @@
-# Systemair VSR300/400/500 Integration for Home Assistant
-Note: It it designed for VSR300 but will work for the two others as well. Extra sensors and tuning could be done.
+# Systemair VSR/VTR 300/400/500 Integration for Home Assistant
+Note: It it designed for VSR300 but will work for the others as well. VTC devices should work too, but never heard of them, and deactivated the selection for now.
+*A breaking change for release 1.3 lets you select your device, VSR500, VTR400 etc. It then creates the sensors based on this. Tough luck switching between them...
+
+You will need to delete the integration and readd as it has renamed folders etc, to be more generic towards VxR.
+
+*Still some work in progress.
+** Note that the larger 400 and 500 systems have bigger fans etc, so some sensors will need to be adjusted based on what system you select. That is not included as of 1.3, except a test on two flow rate sensors.
 
 ## Information
 I wanted to try to make the former YAML package into a integration using Python, which I want to learn for fun. I code on PLC's for work, so I can read much of the python language, but I can't write it. I've used Gemini  to help me convert my YAML code, so this is technically vibe-coding.
