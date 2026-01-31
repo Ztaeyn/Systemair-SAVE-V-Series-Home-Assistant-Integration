@@ -1,6 +1,6 @@
 {
   "domain": "systemair_vsr",
-  "name": "Systemair Save VSR 300/400/500",
+  "name": "Systemair Save VSR/VTR 300/400/500",
   "codeowners": ["@Ztaeyn"],
   "icon": "mdi:hvac",
   "config_flow": true,

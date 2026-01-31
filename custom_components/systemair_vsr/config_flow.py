@@ -3,14 +3,25 @@ from homeassistant import config_entries
 from homeassistant.const import CONF_MODEL
 from .const import DOMAIN, CONF_SLAVE
 
+# Define the models your integration supports
+SUPPORTED_MODELS = [
+    "VSR 300",
+    "VSR 400",  
+    "VSR 500",
+    "VTR 300",
+    "VTR 500",
+#    "VTC 300",
+#    "VTC 700",
+]
+
 class SaveVSRConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a generic config flow for SaveVSR."""
     VERSION = 1
 
     async def async_step_user(self, user_input=None):
-        """Step where the user enters the hub details."""
+        """Initial step for the SaveVSR setup."""
         if user_input is not None:
-            # The 'title' is what appears on the Integration card in the UI
+            # title shows up in the 'Integrations' list card
             return self.async_create_entry(
                 title=f"Systemair {user_input[CONF_MODEL]}", 
                 data=user_input
@@ -19,11 +30,10 @@ class SaveVSRConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return self.async_show_form(
             step_id="user",
             data_schema=vol.Schema({
-                # This is the string the user sees on the device list
-                vol.Required(CONF_MODEL, default="VSR300"): str,
-                # CRITICAL: This must match the 'name' in configuration.yaml
+                # Change from a string input to a select list
+                vol.Required(CONF_MODEL, default=SUPPORTED_MODELS[0]): vol.In(SUPPORTED_MODELS),
+                # This must match the 'name' in configuration.yaml
                 vol.Required("hub_name", default="save_hub"): str,
-                # Modbus Slave ID (usually 1)
                 vol.Required(CONF_SLAVE, default=1): int,
             })
         )
