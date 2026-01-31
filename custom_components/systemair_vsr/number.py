@@ -1,12 +1,11 @@
 import logging
-from homeassistant.components.number import NumberEntity
+from homeassistant.components.number import NumberEntity, NumberMode
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.const import CONF_MODEL, CONF_NAME
 from homeassistant.components.modbus.const import (
     CALL_TYPE_WRITE_REGISTER, 
     CALL_TYPE_REGISTER_HOLDING
 )
-# We assume Platform constants are used in __init__, but strings work for setup
 from .const import DOMAIN, CONF_SLAVE
 
 _LOGGER = logging.getLogger(__name__)
@@ -96,9 +95,10 @@ async def async_setup_entry(hass, entry, async_add_entities):
     async_add_entities(entities, True)
 
 class SaveVSRNumberSetpoint(NumberEntity):
-    """Generic SaveVSR Number Entity for setpoints and configurations."""
+    """Generic SaveVSR Number Entity set to box mode."""
     
     _attr_has_entity_name = True
+    _attr_mode = NumberMode.BOX  # This forces the input box instead of slider
 
     def __init__(self, hub, model, slave, name, register, min_val, max_val, step, unit, scale, icon, category):
         self._hub = hub
@@ -119,7 +119,6 @@ class SaveVSRNumberSetpoint(NumberEntity):
 
     @property
     def device_info(self):
-        """Unified device info for SaveVSR."""
         return {
             "identifiers": {(DOMAIN, f"{self._model}_{self._slave}")},
             "name": f"Systemair {self._model}",
@@ -128,11 +127,11 @@ class SaveVSRNumberSetpoint(NumberEntity):
         }
 
     async def async_set_native_value(self, value: float) -> None:
-        """Handle user input from the UI slider."""
+        """Handle user input."""
         try:
             modbus_value = int(value * self._scale)
             
-            # Handle negative values for offsets (2's complement)
+            # Handle negative values
             if modbus_value < 0:
                 modbus_value += 65536
 
@@ -142,24 +141,20 @@ class SaveVSRNumberSetpoint(NumberEntity):
             self._attr_native_value = value
             self.async_write_ha_state()
         except Exception as e:
-            _LOGGER.error("SaveVSR: Set value failed for %s: %s", self._attr_name, e)
+            _LOGGER.error("SaveVSR: Set failed for %s: %s", self._attr_name, e)
 
     async def async_update(self):
-        """Fetch current value from the unit."""
+        """Fetch current value."""
         try:
             result = await self._hub.async_pb_call(
                 self._slave, self._register, 1, CALL_TYPE_REGISTER_HOLDING
             )
             if result and hasattr(result, 'registers'):
                 val = result.registers[0]
-                
-                # Convert back from 2's complement for negative numbers (e.g. offsets)
                 if val > 32767:
                     val -= 65536
-                    
                 self._attr_native_value = float(val) / self._scale
             else:
                 self._attr_native_value = None
         except Exception as e:
             _LOGGER.error("SaveVSR: Update failed for %s: %s", self._attr_name, e)
-            self._attr_native_value = None
