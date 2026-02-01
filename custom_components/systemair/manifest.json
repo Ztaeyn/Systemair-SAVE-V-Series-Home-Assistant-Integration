@@ -1,6 +1,6 @@
 {
   "domain": "systemair",
-  "name": "Systemair SAVE V-Series (VxR/VxT)",
+  "name": "Systemair SAVE V-Series",
   "codeowners": ["@Ztaeyn"],
   "icon": "mdi:hvac",
   "config_flow": true,

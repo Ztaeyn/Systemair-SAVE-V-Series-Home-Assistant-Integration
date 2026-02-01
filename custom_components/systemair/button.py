@@ -7,8 +7,6 @@ from .const import DOMAIN, CONF_SLAVE
 
 _LOGGER = logging.getLogger(__name__)
 
-# Action Mapping: (Name, Mode Register 1161, Speed Register 1130 or None)
-# Shortened names as they will appear under the Device name in the UI.
 VENT_ACTIONS = {
     "Normal Mode": (2, 3),
     "Low Speed": (2, 2),

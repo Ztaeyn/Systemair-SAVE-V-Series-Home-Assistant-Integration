@@ -6,7 +6,6 @@ from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
-# Use Platform constants for better reliability
 PLATFORMS = [
     Platform.CLIMATE,
     Platform.SENSOR,

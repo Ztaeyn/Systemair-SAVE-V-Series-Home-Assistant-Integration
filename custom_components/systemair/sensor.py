@@ -5,7 +5,12 @@ from homeassistant.components.sensor import (
     SensorDeviceClass, 
     SensorStateClass
 )
-from homeassistant.const import UnitOfTemperature, CONF_MODEL, CONF_NAME
+from homeassistant.const import (
+    UnitOfTemperature, 
+    UnitOfPower,
+    CONF_MODEL, 
+    CONF_NAME
+)
 from homeassistant.components.modbus.const import (
     CALL_TYPE_REGISTER_HOLDING,
     CALL_TYPE_REGISTER_INPUT
@@ -14,7 +19,6 @@ from .const import DOMAIN, CONF_SLAVE
 
 _LOGGER = logging.getLogger(__name__)
 
-# List: (Name, Register, DeviceClass, Unit, Scale, Icon, StateClass)
 VSR_SENSORS = [
     ("Outdoor Temperature", 12101, SensorDeviceClass.TEMPERATURE, UnitOfTemperature.CELSIUS, 0.1, None, SensorStateClass.MEASUREMENT),
     ("Supply Air Temperature", 12102, SensorDeviceClass.TEMPERATURE, UnitOfTemperature.CELSIUS, 0.1, None, SensorStateClass.MEASUREMENT),
@@ -30,38 +34,35 @@ VSR_SENSORS = [
     ("Extractor Air Fan Speed", 14001, None, "%", 1.0, "mdi:fan", SensorStateClass.MEASUREMENT),
     ("Supply Airflow Rate", 14000, None, "m³/h", 3.0, "mdi:home-switch", SensorStateClass.MEASUREMENT),
     ("Extractor Airflow Rate", 14001, None, "m³/h", 3.0, "mdi:home-switch", SensorStateClass.MEASUREMENT), 
- 
     ("Current Fan Mode", 1160, None, None, 1.0, "mdi:air-conditioner", None),
     ("Mode Time Remaining", 1111, None, None, 1.0, "mdi:timer-sand", None), 
     ("Filter Time Remaining", 7005, None, "days", 1.0, "mdi:clock-end", SensorStateClass.MEASUREMENT),
     ("Filter Alarm Code", 15141, None, None, 1.0, "mdi:alert-circle", None),
     ("Heat Recovery", 14102, None, "%", 1.0, "mdi:sync", SensorStateClass.MEASUREMENT),
     ("Summer Winter Operation", 1038, None, None, 1, "mdi:sun-snowflake-variant", None),
+    
+    # Both of these will now point to register 2148 internally
     ("Heater Power (TRIAC)", 2148, None, "%", 1.0, "mdi:heating-coil", SensorStateClass.MEASUREMENT),
+    ("Heater Power Watts", 2148, SensorDeviceClass.POWER, UnitOfPower.WATT, 16.7, "mdi:lightning-bolt", SensorStateClass.MEASUREMENT),
+    
     ("Manual Fan Speed Setting", 1130, None, None, 1.0, "mdi:cog-clockwise", None),
- 
 ]
 
 async def async_setup_entry(hass, entry, async_add_entities):
     """Set up SaveVSR sensors."""
     config = entry.data
     hub_name = config.get("hub_name", "modbus_hub")
-    
     from homeassistant.components.modbus import get_hub
     hub = get_hub(hass, hub_name)
-
     if hub is None:
         _LOGGER.error("SaveVSR: Modbus hub '%s' not found", hub_name)
         return
-
     model = config.get(CONF_MODEL, "SAVE")
     slave = config.get(CONF_SLAVE, 1)
-
     entities = [SaveVSRGenericSensor(hub, model, slave, *s) for s in VSR_SENSORS]
     async_add_entities(entities, True)
 
 class SaveVSRGenericSensor(SensorEntity):
-    """Generic SaveVSR Sensor."""
     _attr_has_entity_name = True
 
     def __init__(self, hub, model, slave, name, register, device_class, unit, scale, icon, state_class=None):
@@ -75,22 +76,13 @@ class SaveVSRGenericSensor(SensorEntity):
         self._attr_native_unit_of_measurement = unit
         self._attr_icon = icon
         self._attr_state_class = state_class
-        
-        # FIX: Include the name or unit in the ID to allow multiple sensors per register
-        # This makes 'vsr_1_sensor_14000_percent' and 'vsr_1_sensor_14000_m3h' unique
         clean_name = name.lower().replace(" ", "_")
         self._attr_unique_id = f"{DOMAIN}_{slave}_sensor_{register}_{clean_name}"
-        
         self._state = None
 
     @property
     def device_info(self):
-        return {
-            "identifiers": {(DOMAIN, f"{self._model}_{self._slave}")},
-            "name": f"Systemair {self._model}",
-            "manufacturer": "Systemair",
-            "model": f"SAVE {self._model}",
-        }
+        return {"identifiers": {(DOMAIN, f"{self._model}_{self._slave}")}, "name": f"Systemair {self._model}", "manufacturer": "Systemair", "model": f"SAVE {self._model}"}
 
     @property
     def native_value(self):
@@ -98,7 +90,7 @@ class SaveVSRGenericSensor(SensorEntity):
 
     async def async_update(self):
         try:
-            # 1. 32-bit Input Registers (Timers)
+            # 1. 32-bit Timers
             if self._register == 1111:
                 res_l = await self._hub.async_pb_call(self._slave, 1110, 1, CALL_TYPE_REGISTER_INPUT)
                 res_h = await self._hub.async_pb_call(self._slave, 1111, 1, CALL_TYPE_REGISTER_INPUT)
@@ -111,14 +103,13 @@ class SaveVSRGenericSensor(SensorEntity):
                         self._state = "Inactive"
                 return
 
-            # 2. Current Fan Mode Logic
+            # 2. Fan Mode
             if self._register == 1160:
                 res_mode = await self._hub.async_pb_call(self._slave, 1160, 1, CALL_TYPE_REGISTER_INPUT)
                 if res_mode and hasattr(res_mode, 'registers'):
                     mode_val = res_mode.registers[0]
                     res_cmd = await self._hub.async_pb_call(self._slave, 1130, 1, CALL_TYPE_REGISTER_HOLDING)
                     cmd_val = res_cmd.registers[0] if res_cmd and hasattr(res_cmd, 'registers') else None
-
                     if mode_val == 0:
                         self._state = {2: "Auto - Low", 3: "Auto - Normal", 4: "Auto - High"}.get(cmd_val, "Auto")
                     elif mode_val == 1:
@@ -128,7 +119,7 @@ class SaveVSRGenericSensor(SensorEntity):
                         self._state = mode_map.get(mode_val, f"Mode {mode_val}")
                 return
 
-            # 3. Filter Time (32-bit Holding)
+            # 3. Filter Time
             if self._register == 7005:
                 result = await self._hub.async_pb_call(self._slave, 7004, 2, CALL_TYPE_REGISTER_HOLDING)
                 if result and hasattr(result, 'registers') and len(result.registers) >= 2:
@@ -136,9 +127,7 @@ class SaveVSRGenericSensor(SensorEntity):
                     self._state = round(total_seconds / 86400, 1)
                 return
 
-            # 4. Standard Update Logic
-            # Smart selection between Holding and Input registers
-            # Note: Heater Power uses 12108 (Input) for real 0-100% data
+            # 4. Standard Logic
             is_input = (12000 <= self._register <= 16000) or self._register in [1160, 1111]
             call_type = CALL_TYPE_REGISTER_INPUT if is_input else CALL_TYPE_REGISTER_HOLDING
 
@@ -146,7 +135,6 @@ class SaveVSRGenericSensor(SensorEntity):
             
             if result and hasattr(result, 'registers'):
                 val = result.registers[0]
-                
                 if self._register == 1038: 
                     self._state = "Summer" if val == 0 else "Winter"
                 elif self._register == 1130:
@@ -155,9 +143,15 @@ class SaveVSRGenericSensor(SensorEntity):
                     self._state = {0: "No Alarm", 1: "Warning", 2: "Overdue"}.get(val, val)
                 else:
                     float_val = float(val)
-                    # Handle negative numbers for temperature sensors
-                    if is_input and self._register not in [12400, 12401, 12135]:
+                    
+                    # Prevent negative values for the TRIAC/Power register
+                    if self._register == 2148:
+                        float_val = max(0.0, float_val)
+
+                    # Temperature sign handling
+                    if is_input and self._register not in [12400, 12401, 12135, 14000, 14001, 14102]:
                         if float_val > 32767: float_val -= 65536
+                    
                     self._state = round(float_val * self._scale, 1)
 
         except Exception as e:
