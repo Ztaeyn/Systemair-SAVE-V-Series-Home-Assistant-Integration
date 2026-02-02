@@ -2,7 +2,7 @@ import asyncio
 import logging
 from homeassistant.components.select import SelectEntity
 from homeassistant.helpers.entity import EntityCategory
-from homeassistant.const import CONF_MODEL, CONF_NAME
+from homeassistant.const import CONF_MODEL
 from homeassistant.components.modbus.const import (
     CALL_TYPE_WRITE_REGISTER,
     CALL_TYPE_REGISTER_HOLDING,
@@ -12,71 +12,69 @@ from .const import DOMAIN, CONF_SLAVE
 
 _LOGGER = logging.getLogger(__name__)
 
-# --- MAPPINGS ---
+# --- MAPPINGS (Nøkler som må finnes i JSON) ---
 VENTILATION_MODES = {
-    "Manual Low": (1, 2),
-    "Manual Normal": (1, 3),
-    "Manual High": (1, 4),
-    "Auto": (0, None),      
-    "Crowded": (2, None),
-    "Refresh": (3, None),
-    "Fireplace": (4, None),
-    "Away": (5, None),
-    "Holiday": (6, None),
+    "manual_low": (1, 2),
+    "manual_normal": (1, 3),
+    "manual_high": (1, 4),
+    "auto": (0, None),      
+    "crowded": (2, None),
+    "refresh": (3, None),
+    "fireplace": (4, None),
+    "away": (5, None),
+    "holiday": (6, None),
 }
 
-AIRFLOW_LEVELS = {"Normal": 3, "High": 4, "Maximum": 5}
-AWAY_LEVELS = {"Off": 0, "Minimum": 1, "Low": 2, "Normal": 3}
-SCHEDULE_LEVELS = {"Off": 1, "Low": 2, "Normal": 3, "High": 4, "Demand": 5}
-TEMP_CONTROL_MODES = {"Supply": 0, "Room": 1, "Extract": 2}
+AIRFLOW_LEVELS = {"normal": 3, "high": 4, "maximum": 5}
+AWAY_LEVELS = {"off": 0, "minimum": 1, "low": 2, "normal": 3}
+SCHEDULE_LEVELS = {"off": 1, "low": 2, "normal": 3, "high": 4, "demand": 5}
+TEMP_CONTROL_MODES = {"supply": 0, "room": 1, "extract": 2}
 
 async def async_setup_entry(hass, entry, async_add_entities):
-    """Set up SaveVSR select entities."""
+    """Set up Systemair select entities."""
     config = entry.data
-    hub_name = config.get("hub_name", "modbus_hub")
-    
     from homeassistant.components.modbus import get_hub
-    hub = get_hub(hass, hub_name)
+    hub = get_hub(hass, config.get("hub_name", "modbus_hub"))
     
     if hub is None:
-        _LOGGER.error("SaveVSR: Modbus hub '%s' not found for select", hub_name)
+        _LOGGER.error("Systemair: Modbus hub not found for select")
         return
 
     model = config.get(CONF_MODEL, "SAVE")
     slave = config.get(CONF_SLAVE, 1)
         
     async_add_entities([
-        SaveVSRVentModeSelect(hub, model, slave, "Ventilation Mode"),
+        SystemairVentModeSelect(hub, model, slave, "ventilation_mode"),
 
         # Crowded & Refresh
-        SaveVSRGeneralSelect(hub, model, slave, "Crowded Airflow Supply Level", 1134, AIRFLOW_LEVELS, "mdi:gauge-full", EntityCategory.CONFIG),
-        SaveVSRGeneralSelect(hub, model, slave, "Crowded Airflow Extract Level", 1135, AIRFLOW_LEVELS, "mdi:gauge-full", EntityCategory.CONFIG),
-        SaveVSRGeneralSelect(hub, model, slave, "Refresh Airflow Supply Level", 1136, AIRFLOW_LEVELS, "mdi:gauge-full", EntityCategory.CONFIG),
-        SaveVSRGeneralSelect(hub, model, slave, "Refresh Airflow Extract Level", 1137, AIRFLOW_LEVELS, "mdi:gauge-full", EntityCategory.CONFIG),
+        SystemairGeneralSelect(hub, model, slave, "crowded_supply_level", 1134, AIRFLOW_LEVELS, "mdi:gauge-full", EntityCategory.CONFIG),
+        SystemairGeneralSelect(hub, model, slave, "crowded_extract_level", 1135, AIRFLOW_LEVELS, "mdi:gauge-full", EntityCategory.CONFIG),
+        SystemairGeneralSelect(hub, model, slave, "refresh_supply_level", 1136, AIRFLOW_LEVELS, "mdi:gauge-full", EntityCategory.CONFIG),
+        SystemairGeneralSelect(hub, model, slave, "refresh_extract_level", 1137, AIRFLOW_LEVELS, "mdi:gauge-full", EntityCategory.CONFIG),
         
         # Fireplace & Free Cooling
-        SaveVSRGeneralSelect(hub, model, slave, "Fireplace Airflow Supply Level", 1138, AIRFLOW_LEVELS, "mdi:gauge-full", EntityCategory.CONFIG),
-        SaveVSRGeneralSelect(hub, model, slave, "Fireplace Airflow Extract Level", 1139, AIRFLOW_LEVELS, "mdi:gauge-full", EntityCategory.CONFIG),
-        SaveVSRGeneralSelect(hub, model, slave, "Free Cooling Supply Level", 4111, AIRFLOW_LEVELS, "mdi:gauge-full", EntityCategory.CONFIG),
-        SaveVSRGeneralSelect(hub, model, slave, "Free Cooling Extract Level", 4112, AIRFLOW_LEVELS, "mdi:gauge-full", EntityCategory.CONFIG),
+        SystemairGeneralSelect(hub, model, slave, "fireplace_supply_level", 1138, AIRFLOW_LEVELS, "mdi:gauge-full", EntityCategory.CONFIG),
+        SystemairGeneralSelect(hub, model, slave, "fireplace_extract_level", 1139, AIRFLOW_LEVELS, "mdi:gauge-full", EntityCategory.CONFIG),
+        SystemairGeneralSelect(hub, model, slave, "free_cooling_supply", 4111, AIRFLOW_LEVELS, "mdi:gauge-full", EntityCategory.CONFIG),
+        SystemairGeneralSelect(hub, model, slave, "free_cooling_extract", 4112, AIRFLOW_LEVELS, "mdi:gauge-full", EntityCategory.CONFIG),
         
         # Away & Holiday
-        SaveVSRGeneralSelect(hub, model, slave, "Away Airflow Supply Level", 1140, AWAY_LEVELS, "mdi:fan-minus", EntityCategory.CONFIG),
-        SaveVSRGeneralSelect(hub, model, slave, "Away Airflow Extract Level", 1141, AWAY_LEVELS, "mdi:fan-minus", EntityCategory.CONFIG),
-        SaveVSRGeneralSelect(hub, model, slave, "Holiday Airflow Supply Level", 1142, AWAY_LEVELS, "mdi:fan-off", EntityCategory.CONFIG),
-        SaveVSRGeneralSelect(hub, model, slave, "Holiday Airflow Extract Level", 1143, AWAY_LEVELS, "mdi:fan-off", EntityCategory.CONFIG),
+        SystemairGeneralSelect(hub, model, slave, "away_supply_level", 1140, AWAY_LEVELS, "mdi:fan-minus", EntityCategory.CONFIG),
+        SystemairGeneralSelect(hub, model, slave, "away_extract_level", 1141, AWAY_LEVELS, "mdi:fan-minus", EntityCategory.CONFIG),
+        SystemairGeneralSelect(hub, model, slave, "holiday_supply_level", 1142, AWAY_LEVELS, "mdi:fan-off", EntityCategory.CONFIG),
+        SystemairGeneralSelect(hub, model, slave, "holiday_extract_level", 1143, AWAY_LEVELS, "mdi:fan-off", EntityCategory.CONFIG),
 
         # System
-        SaveVSRGeneralSelect(hub, model, slave, "Temp Control Mode", 2030, TEMP_CONTROL_MODES, "mdi:tune-vertical", EntityCategory.CONFIG),
-        SaveVSRGeneralSelect(hub, model, slave, "Scheduled Airflow Fan Level", 5059, SCHEDULE_LEVELS, "mdi:gauge-full", EntityCategory.CONFIG), 
-        SaveVSRGeneralSelect(hub, model, slave, "Unscheduled Airflow Fan Level", 5060, SCHEDULE_LEVELS, "mdi:gauge-full", EntityCategory.CONFIG) 
+        SystemairGeneralSelect(hub, model, slave, "temp_control_mode", 2030, TEMP_CONTROL_MODES, "mdi:tune-vertical", EntityCategory.CONFIG),
+        SystemairGeneralSelect(hub, model, slave, "sched_airflow_level", 5059, SCHEDULE_LEVELS, "mdi:gauge-full", EntityCategory.CONFIG), 
+        SystemairGeneralSelect(hub, model, slave, "unsched_airflow_level", 5060, SCHEDULE_LEVELS, "mdi:gauge-full", EntityCategory.CONFIG) 
     ], True)
 
-class SaveVSRGeneralSelect(SelectEntity):
-    """Generic Select for single-register mappings."""
+class SystemairGeneralSelect(SelectEntity):
+    """Generic Select for single-register mappings using translation keys."""
     _attr_has_entity_name = True
 
-    def __init__(self, hub, model, slave, name, register, mapping, icon, category=None):
+    def __init__(self, hub, model, slave, translation_key, register, mapping, icon, category=None):
         self._hub = hub
         self._slave = slave
         self._model = model
@@ -84,7 +82,7 @@ class SaveVSRGeneralSelect(SelectEntity):
         self._mapping = mapping
         self._inv_mapping = {v: k for k, v in mapping.items()}
         
-        self._attr_name = name
+        self._attr_translation_key = translation_key
         self._attr_options = list(mapping.keys())
         self._attr_icon = icon
         self._attr_entity_category = category
@@ -109,19 +107,19 @@ class SaveVSRGeneralSelect(SelectEntity):
         try:
             res = await self._hub.async_pb_call(self._slave, self._register, 1, CALL_TYPE_REGISTER_HOLDING)
             if res and hasattr(res, 'registers'):
-                self._attr_current_option = self._inv_mapping.get(res.registers[0], "Unknown")
+                self._attr_current_option = self._inv_mapping.get(res.registers[0])
         except Exception as e:
-            _LOGGER.error("SaveVSR: Select update failed for %s: %s", self._attr_name, e)
+            _LOGGER.error("Systemair: Select update failed for %s: %s", self._attr_translation_key, e)
 
-class SaveVSRVentModeSelect(SelectEntity):
-    """Combined Mode (1161) and Speed (1130) control."""
+class SystemairVentModeSelect(SelectEntity):
+    """Combined Mode control using translation keys."""
     _attr_has_entity_name = True
 
-    def __init__(self, hub, model, slave, name):
+    def __init__(self, hub, model, slave, translation_key):
         self._hub = hub
         self._slave = slave
         self._model = model
-        self._attr_name = name
+        self._attr_translation_key = translation_key
         self._attr_options = list(VENTILATION_MODES.keys())
         self._attr_unique_id = f"{DOMAIN}_{slave}_vent_mode"
 
@@ -144,7 +142,7 @@ class SaveVSRVentModeSelect(SelectEntity):
             self._attr_current_option = option
             self.async_write_ha_state()
         except Exception as e:
-            _LOGGER.error("SaveVSR: Failed to set ventilation mode %s: %s", option, e)
+            _LOGGER.error("Systemair: Failed to set ventilation mode %s: %s", option, e)
 
     async def async_update(self):
         try:
@@ -155,10 +153,11 @@ class SaveVSRVentModeSelect(SelectEntity):
                 m_val = res_mode.registers[0]
                 s_val = res_speed.registers[0] if res_speed and hasattr(res_speed, 'registers') else None
 
-                if m_val == 0: self._attr_current_option = "Auto"
+                if m_val == 0: 
+                    self._attr_current_option = "auto"
                 elif m_val == 1:
-                    self._attr_current_option = {2: "Manual Low", 3: "Manual Normal", 4: "Manual High"}.get(s_val, "Manual Normal")
+                    self._attr_current_option = {2: "manual_low", 3: "manual_normal", 4: "manual_high"}.get(s_val, "manual_normal")
                 else:
-                    self._attr_current_option = {2: "Crowded", 3: "Refresh", 4: "Fireplace", 5: "Away", 6: "Holiday"}.get(m_val)
+                    self._attr_current_option = {2: "crowded", 3: "refresh", 4: "fireplace", 5: "away", 6: "holiday"}.get(m_val)
         except Exception as e:
-            _LOGGER.error("SaveVSR: Vent mode update failed: %s", e)
+            _LOGGER.error("Systemair: Vent mode update failed: %s", e)

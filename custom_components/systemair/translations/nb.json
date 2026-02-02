@@ -1,0 +1,245 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Oppsett av Systemair ventilasjonsenhet",
+        "description": "Vennligst legg inn Modbus-detaljer. Forsikre deg om at Modbus Hub allerede er konfigurert i din configuration.yaml.",
+        "data": {
+          "model": "Enhetsmodell",
+          "hub_name": "Modbus Hub Navn",
+          "slave": "Modbus Slave ID"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Kunne ikke koble til Modbus-huben",
+      "invalid_auth": "Ugyldig autentisering",
+      "unknown": "Uventet feil oppstod"
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "a_alarm": { "name": "A-alarm" },
+      "b_alarm": { "name": "B-alarm" },
+      "c_alarm": { "name": "C-alarm" },
+      "filter_alarm": { "name": "Filteralarm" },
+      "temp_low_alarm": { "name": "Lav tilluftstemperatur alarm" },
+      "hood_status": { "name": "Kjøkkenhette status" },
+      "free_cooling": { "name": "Frikjøling aktiv" },
+      "triac_signal": { "name": "TRIAC kontrollsignal" },
+      "maintenance_mode": { "name": "Vedlikeholdsmodus aktiv" }
+    },
+    "button": {
+      "btn_normal_mode": { "name": "Normal hastighet" },
+      "btn_low_speed": { "name": "Lav hastighet" },
+      "btn_high_speed": { "name": "Høy hastighet" },
+      "btn_fireplace": { "name": "Peis-modus" },
+      "btn_refresh": { "name": "Utlufting" },
+      "btn_crowded": { "name": "Selskapsmodus" },
+      "btn_away": { "name": "Bortemodus" },
+      "btn_auto": { "name": "Automodus" },
+      "btn_stop": { "name": "Stopp aggregat" }
+    },
+    "climate": {
+      "save_vsr": {
+        "state_attributes": {
+          "preset_mode": {
+            "auto": "Auto",
+            "manual_low": "Manuell lav",
+            "manual_normal": "Manuell normal",
+            "manual_high": "Manuell høy",
+            "crowded": "Selskap",
+            "refresh": "Utlufting",
+            "fireplace": "Peisfyring",
+            "away": "Borte",
+            "holiday": "Ferie"
+          }
+        }
+      }
+    },
+    "number": {
+      "supply_air_setpoint": { "name": "Settpunkt tilluft" },
+      "holiday_duration": { "name": "Varighet feriemodus" },
+      "away_duration": { "name": "Varighet bortemodus" },
+      "fireplace_duration": { "name": "Varighet peismodus" },
+      "refresh_duration": { "name": "Varighet utlufting" },
+      "crowded_duration": { "name": "Varighet selskapsmodus" },
+      "eco_offset": { "name": "Eco-modus varmeoffset" },
+      "exhaust_setpoint": { "name": "Settpunkt avtrekk" },
+      "exhaust_min_setpoint": { "name": "Minimum settpunkt avtrekk" },
+      "exhaust_max_setpoint": { "name": "Maksimum settpunkt avtrekk" },
+      "fan_comp_read": { "name": "Viftekompensasjon (Lese)" },
+      "fan_comp_winter": { "name": "Viftekompensasjon (Vinter)" },
+      "winter_comp_temp": { "name": "Vinterkomp. sjekktemperatur" },
+      "winter_comp_start": { "name": "Vinterkomp. starttemperatur" },
+      "winter_comp_max": { "name": "Vinterkomp. makstemperatur" },
+      "fan_comp_summer": { "name": "Viftekompensasjon (Sommer)" },
+      "summer_comp_start": { "name": "Sommerkomp. starttemperatur" },
+      "summer_comp_max": { "name": "Sommerkomp. makstemperatur" },
+      "sf_min_rpm": { "name": "Tilluftsvifte minimum RPM" },
+      "ef_min_rpm": { "name": "Avtrekksvifte minimum RPM" },
+      "sf_low_rpm": { "name": "Tilluftsvifte lav RPM" },
+      "ef_low_rpm": { "name": "Avtrekksvifte lav RPM" },
+      "sf_normal_rpm": { "name": "Tilluftsvifte normal RPM" },
+      "ef_normal_rpm": { "name": "Avtrekksvifte normal RPM" },
+      "sf_high_rpm": { "name": "Tilluftsvifte høy RPM" },
+      "ef_high_rpm": { "name": "Avtrekksvifte høy RPM" },
+      "sf_max_rpm": { "name": "Tilluftsvifte maksimum RPM" },
+      "ef_max_rpm": { "name": "Avtrekksvifte maksimum RPM" },
+      "sf_holiday_setpoint": { "name": "Tilluftsvifte settpunkt ferie" },
+      "ef_holiday_setpoint": { "name": "Avtrekksvifte settpunkt ferie" },
+      "sf_hood_setpoint": { "name": "Tilluftsvifte settpunkt kjøkkenhette" },
+      "ef_hood_setpoint": { "name": "Avtrekksvifte settpunkt kjøkkenhette" },
+      "sf_vacuum_setpoint": { "name": "Tilluftsvifte settpunkt vakuum" },
+      "ef_vacuum_setpoint": { "name": "Avtrekksvifte settpunkt vakuum" },
+      "moisture_setpoint": { "name": "Settpunkt fuktfjerning" },
+      "filter_interval": { "name": "Filterbytte-intervall" },
+      "fc_outdoor_day_min": { "name": "Frikjøling dag min. utetemp" },
+      "fc_outdoor_night_high": { "name": "Frikjøling natt øvre grense" },
+      "fc_outdoor_night_low": { "name": "Frikjøling natt nedre grense" },
+      "fc_indoor_low_limit": { "name": "Frikjøling inne dag nedre grense" },
+      "sched_active_offset": { "name": "Planlagt aktiv temp-offset" },
+      "sched_inactive_offset": { "name": "Planlagt inaktiv temp-offset" }
+    },
+    "select": {
+      "ventilation_mode": {
+        "name": "Ventilasjonsmodus",
+        "state": {
+          "manual_low": "Manuell Lav",
+          "manual_normal": "Manuell Normal",
+          "manual_high": "Manuell Høy",
+          "auto": "Auto",
+          "crowded": "Selskap",
+          "refresh": "Utlufting",
+          "fireplace": "Peis",
+          "away": "Borte",
+          "holiday": "Ferie"
+        }
+      },
+      "crowded_supply_level": { "name": "Selskap - tilluft nivå", "state": { "normal": "Normal", "high": "Høy", "maximum": "Maksimalt" } },
+      "crowded_extract_level": { "name": "Selskap - avtrekk nivå", "state": { "normal": "Normal", "high": "Høy", "maximum": "Maksimalt" } },
+      "refresh_supply_level": { "name": "Utlufting - tilluft nivå", "state": { "normal": "Normal", "high": "Høy", "maximum": "Maksimalt" } },
+      "refresh_extract_level": { "name": "Utlufting - avtrekk nivå", "state": { "normal": "Normal", "high": "Høy", "maximum": "Maksimalt" } },
+      "fireplace_supply_level": { "name": "Peis - tilluft nivå", "state": { "normal": "Normal", "high": "Høy", "maximum": "Maksimalt" } },
+      "fireplace_extract_level": { "name": "Peis - avtrekk nivå", "state": { "normal": "Normal", "high": "Høy", "maximum": "Maksimalt" } },
+      "free_cooling_supply": { "name": "Frikjøling - tilluft nivå", "state": { "normal": "Normal", "high": "Høy", "maximum": "Maksimalt" } },
+      "free_cooling_extract": { "name": "Frikjøling - avtrekk nivå", "state": { "normal": "Normal", "high": "Høy", "maximum": "Maksimalt" } },
+      "away_supply_level": { "name": "Borte - tilluft nivå", "state": { "off": "Av", "minimum": "Minimalt", "low": "Lav", "normal": "Normal" } },
+      "away_extract_level": { "name": "Borte - avtrekk nivå", "state": { "off": "Av", "minimum": "Minimalt", "low": "Lav", "normal": "Normal" } },
+      "holiday_supply_level": { "name": "Ferie - tilluft nivå", "state": { "off": "Av", "minimum": "Minimalt", "low": "Lav", "normal": "Normal" } },
+      "holiday_extract_level": { "name": "Ferie - avtrekk nivå", "state": { "off": "Av", "minimum": "Minimalt", "low": "Lav", "normal": "Normal" } },
+      "temp_control_mode": { 
+        "name": "Temperaturkontroll-modus",
+        "state": { "supply": "Tilluft", "room": "Rom", "extract": "Avtrekk" }
+      },
+      "sched_airflow_level": { 
+        "name": "Ukeplan - viftenivå",
+        "state": { "off": "Av", "low": "Lav", "normal": "Normal", "high": "Høy", "demand": "Behov" }
+      },
+      "unsched_airflow_level": { 
+        "name": "Utenom plan - viftenivå",
+        "state": { "off": "Av", "low": "Lav", "normal": "Normal", "high": "Høy", "demand": "Behov" }
+      }
+    },
+    "sensor": {
+      "outdoor_temp": { "name": "Inntakstemperatur" }, 
+      "supply_temp": { "name": "Tilluftstemperatur" }, 
+      "extract_temp": { "name": "Avtrekkstemperatur (Intern)" },
+      "eff_temp": { "name": "Avkasttemperatur" }, 
+      "overheat_temp": { "name": "Tilluftstemperatur Overoppheting" }, 
+      "exhaust_temp": { "name": "Avtrekkstemperatur" }, 
+      "rel_moisture": { "name": "Relativ fuktighet" },
+      "calc_moisture_extract": { "name": "Beregnet fuktfjerning" },
+      "calc_moisture_intake": { "name": "Beregnet fuktinntak" },
+      "sf_rpm": { "name": "Tilluftsvifte Turtall" },
+      "ef_rpm": { "name": "Avtrekksvifte Turtall" },
+      "sf_speed_pct": { "name": "Tilluftsvifte Pådrag" },
+      "ef_speed_pct": { "name": "Avtrekksvifte Pådrag" },
+      "sf_flow_rate": { "name": "Tilluft Luftmengde" },
+      "ef_flow_rate": { "name": "Avtrekk Luftmengde" },
+      "heat_recovery_efficiency": { "name": "Gjenvinner Virkningsgrad" },
+      "heater_pct": { "name": "Varmeelement Pådrag" }, 
+      "heater_watts": { "name": "Varmeelement Effekt" }, 
+      "filter_time_rem": { "name": "Filter tid igjen" },
+      "filter_alarm_code": { "name": "Filter Alarmkode" },
+      "mode_time_rem": { "name": "Gjenværende tid i modus" },
+      "manual_fan_reg": { "name": "Manuell vifteinnstilling" },
+      "summer_winter": {
+        "name": "Sommer/Vinter-drift",
+        "state": {
+          "summer": "Sommer",
+          "winter": "Vinter"
+        }
+      },
+      "fan_mode": {
+        "name": "Gjeldende viftemodus",
+        "state": {
+          "auto_low": "Auto Lav",
+          "auto_normal": "Auto Normal",
+          "auto_high": "Auto Høy",
+          "manual_stop": "Manuell Stopp",
+          "manual_low": "Manuell Lav",
+          "manual_normal": "Manuell Normal",
+          "manual_high": "Manuell Høy",
+          "crowded": "Selskap",
+          "refresh": "Utlufting",
+          "fireplace": "Peis",
+          "away": "Borte",
+          "holiday": "Ferie",
+          "cooker_hood": "Kjøkkenventilator"
+        }
+      }
+    },
+    "switch": {
+      "eco_mode": { "name": "Eco-modus" },
+      "free_cooling": { "name": "Frikjøling" },
+      "fan_stop_allowed": { "name": "Manuell viftestopp tillatt" },
+      "mon_p1": { "name": "Mandag periode 1" },
+      "mon_p2": { "name": "Mandag periode 2" },
+      "tue_p1": { "name": "Tirsdag periode 1" },
+      "tue_p2": { "name": "Tirsdag periode 2" },
+      "wed_p1": { "name": "Onsdag periode 1" },
+      "wed_p2": { "name": "Onsdag periode 2" },
+      "thu_p1": { "name": "Torsdag periode 1" },
+      "thu_p2": { "name": "Torsdag periode 2" },
+      "fri_p1": { "name": "Fredag periode 1" },
+      "fri_p2": { "name": "Fredag periode 2" },
+      "sat_p1": { "name": "Lørdag periode 1" },
+      "sat_p2": { "name": "Lørdag periode 2" },
+      "sun_p1": { "name": "Søndag periode 1" },
+      "sun_p2": { "name": "Søndag periode 2" }
+    },
+    "time": {
+      "fc_start": { "name": "Frikjøling starttid" },
+      "fc_end": { "name": "Frikjøling sluttid" },
+      "mon_p1_start": { "name": "Mandag periode 1 start" },
+      "mon_p1_end": { "name": "Mandag periode 1 slutt" },
+      "mon_p2_start": { "name": "Mandag periode 2 start" },
+      "mon_p2_end": { "name": "Mandag periode 2 slutt" },
+      "tue_p1_start": { "name": "Tirsdag periode 1 start" },
+      "tue_p1_end": { "name": "Tirsdag periode 1 slutt" },
+      "tue_p2_start": { "name": "Tirsdag periode 2 start" },
+      "tue_p2_end": { "name": "Tirsdag periode 2 slutt" },
+      "wed_p1_start": { "name": "Onsdag periode 1 start" },
+      "wed_p1_end": { "name": "Onsdag periode 1 slutt" },
+      "wed_p2_start": { "name": "Onsdag periode 2 start" },
+      "wed_p2_end": { "name": "Onsdag periode 2 slutt" },
+      "thu_p1_start": { "name": "Torsdag periode 1 start" },
+      "thu_p1_end": { "name": "Torsdag periode 1 slutt" },
+      "thu_p2_start": { "name": "Torsdag periode 2 start" },
+      "thu_p2_end": { "name": "Torsdag periode 2 slutt" },
+      "fri_p1_start": { "name": "Fredag periode 1 start" },
+      "fri_p1_end": { "name": "Fredag periode 1 slutt" },
+      "fri_p2_start": { "name": "Fredag periode 2 start" },
+      "fri_p2_end": { "name": "Fredag periode 2 slutt" },
+      "sat_p1_start": { "name": "Lørdag periode 1 start" },
+      "sat_p1_end": { "name": "Lørdag periode 1 slutt" },
+      "sat_p2_start": { "name": "Lørdag periode 2 start" },
+      "sat_p2_end": { "name": "Lørdag periode 2 slutt" },
+      "sun_p1_start": { "name": "Søndag periode 1 start" },
+      "sun_p1_end": { "name": "Søndag periode 1 slutt" },
+      "sun_p2_start": { "name": "Søndag periode 2 start" },
+      "sun_p2_end": { "name": "Søndag periode 2 slutt" }
+    }
+  }
+}

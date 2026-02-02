@@ -25,19 +25,18 @@ _LOGGER = logging.getLogger(__name__)
 
 # --- MATCHING YOUR SELECT.PY MAPPINGS ---
 PRESET_MAP = {
-    "Manual Low": (1, 2),
-    "Manual Normal": (1, 3), # This is PRESET_HOME
-    "Manual High": (1, 4),   # This is PRESET_BOOST
-    "Auto": (0, None),      
-    "Crowded": (2, None),
-    "Refresh": (3, None),
-    "Fireplace": (4, None),
-    "Away": (5, None),       # This is PRESET_AWAY
-    "Holiday": (6, None),
+    "manual_low": (1, 2),
+    "manual_normal": (1, 3), 
+    "manual_high": (1, 4),   
+    "auto": (0, None),      
+    "crowded": (2, None),
+    "refresh": (3, None),
+    "fireplace": (4, None),
+    "away": (5, None),       
+    "holiday": (6, None),
 }
 
 async def async_setup_entry(hass, entry, async_add_entities):
-    """Set up SaveVSR climate platform."""
     config = entry.data
     hub_name = config.get("hub_name", "modbus_hub")
     from homeassistant.components.modbus import get_hub
@@ -45,10 +44,13 @@ async def async_setup_entry(hass, entry, async_add_entities):
     if hub is None: return
     model = config.get(CONF_MODEL, "SAVE")
     slave = config.get(CONF_SLAVE, 1)
-    async_add_entities([SaveVSRClimate(hub, model, slave)], True)
+    async_add_entities([SystemAirClimate(hub, model, slave)], True)
 
-class SaveVSRClimate(ClimateEntity):
+class SystemAirClimate(ClimateEntity):
     _attr_has_entity_name = True
+    # Ved å sette translation_key kan du oversette presets og navn i JSON
+    _attr_translation_key = "systemair_climate" 
+    
     _attr_hvac_modes = [HVACMode.FAN_ONLY, HVACMode.HEAT, HVACMode.OFF]
     _attr_supported_features = ClimateEntityFeature.TARGET_TEMPERATURE | ClimateEntityFeature.PRESET_MODE
     _attr_target_temperature_step = 1.0
@@ -118,12 +120,13 @@ class SaveVSRClimate(ClimateEntity):
                 m_val = res_mode.registers[0]
                 s_val = res_speed.registers[0] if res_speed and hasattr(res_speed, 'registers') else None
                 
-                if m_val == 0: self._attr_preset_mode = "Auto"
+                if m_val == 0: 
+                    self._attr_preset_mode = "auto" # Rettet fra "Auto"
                 elif m_val == 1:
-                    self._attr_preset_mode = {2: "Manual Low", 3: "Manual Normal", 4: "Manual High"}.get(s_val, "Manual Normal")
+                    self._attr_preset_mode = {2: "manual_low", 3: "manual_normal", 4: "manual_high"}.get(s_val, "manual_normal")
                 else:
-                    self._attr_preset_mode = {2: "Crowded", 3: "Refresh", 4: "Fireplace", 5: "Away", 6: "Holiday"}.get(m_val)
-
+                    self._attr_preset_mode = {2: "crowded", 3: "refresh", 4: "fireplace", 5: "away", 6: "holiday"}.get(m_val)
+       
             # 4. HEATING ACTION
             is_heating = (res_triac.registers[0] > 0) if res_triac and hasattr(res_triac, 'registers') else False
 
@@ -136,4 +139,4 @@ class SaveVSRClimate(ClimateEntity):
                     self._attr_hvac_mode = HVACMode.FAN_ONLY
 
         except Exception as e:
-            _LOGGER.error("SaveVSR Climate Update failed: %s", e)
+            _LOGGER.error("SystemAir Climate Update failed: %s", e)
