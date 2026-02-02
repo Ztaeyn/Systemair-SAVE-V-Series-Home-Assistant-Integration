@@ -1,25 +1,21 @@
-# Systemair VSR/VTR 300/400/500 Integration for Home Assistant
-Note: It it designed for VSR300 but will work for the others as well. VTC devices should work too, but never heard of them, and deactivated the selection for now.
-*A breaking change for release 1.3 lets you select your device, VSR500, VTR400 etc. It then creates the sensors based on this. Tough luck switching between them...
+# Systemair VSR/VTR/VTC 300/400/500+"Most of the other sizes" Integration for Home Assistant
+Note: The code is designed and tested on a VSR300 but will work for the others as well, but minor changes as sensor range for bigger fans etc etc can be coded in by request, so that the integration switches to the correct sensor data.
+This integration will show  up as a Systemair device.
+<img width="1185" height="341" alt="image" src="https://github.com/user-attachments/assets/6fffd555-bdc1-4ac9-b2ed-65477f09f5b5" />
 
-You will need to delete the integration and readd as it has renamed folders etc, to be more generic towards VxR.
 
-*Still some work in progress.
-** Note that the larger 400 and 500 systems have bigger fans etc, so some sensors will need to be adjusted based on what system you select. That is not included as of 1.3, except a test on two flow rate sensors.
 
 ## Information
-I wanted to try to make the former YAML package into a integration using Python, which I want to learn for fun. I code on PLC's for work, so I can read much of the python language, but I can't write it. I've used Gemini  to help me convert my YAML code, so this is technically vibe-coding.
-It's been fun, and I hope to use it as motivation to finish a python course.
+I had a YAML package running for my VSR300, but I have always wanted to learn python but never getting around to it with young kids messing my sleep. So I have cheated here to find my motivation, and used Gemini a lot to help me with the code. My daily work is PLC programming, so I grasp much of reading the python code and knows how I want things. Aka kind of vibe coded? 
 
 ## What it does
-If you have not connected your VSR300 to Home Assistant before, this integration lets you control and monitor the system.
-Cut short, it lets you
-* Control what you normally see on the VSR Care HMI screen
-* Set fan modes
-* Configure setpoints for duration
+If you have not connected your VSR300 to Home Assistant before, this integration lets you control and monitor the Systemair from Home Assistant.
+* Set fan modes, setpoints, duration for away etc.
 * Configure fan speeds
-* See filter replacemnt
-* See alarms
+* See filter replacemnt in days,
+* Estimated power usage from the heater
+* See alarms (more can be added, take a look in the modbus documentation and tell me if you need some from there)
+* Control weekly schedule of how the system runs
 
 ### Device elements
 The device added by the integration is separated into
@@ -36,11 +32,15 @@ I did not manage for now to make it install without editing files, as it seems I
 
 0. Prereq: HACS
 1. Add the modbus configuration to your HA server. See the file "your_configuration.yaml"
-2. In the HACS meny press the top right tree dot menu, and Custom Repos, and add https://github.com/Ztaeyn/HA-VSR300-modbus-python-integration as category Integration.
-3. Search for Systemair VSR300 and click download.
+2. In the HACS meny press the top right tree dot menu, and Custom Repos, and add [https://github.com/Ztaeyn/HA-VSR300-modbus-python-integration](https://github.com/Ztaeyn/Systemair-SAVE-V-Series-Home-Assistant-Integration) as category Integration.
+3. Search for Systemair and press download.
 4. Restart Home Assistant
-5. Now go to Devices and add new integration and search for Systemair VSR300 and add it.
+5. Now go to Devices and add new integration and search for Systemair and add it.
 6. It should now be available as a device under Home Assistant.
+7. Select your unit from the list. The rest should be from what you configured in configuration.yaml.
+
+<img width="603" height="330" alt="image" src="https://github.com/user-attachments/assets/9eca3de1-5c5d-4ba9-8a87-571a4f9ef7be" />
+
 
 <img width="1124" height="776" alt="image" src="https://github.com/user-attachments/assets/616d7609-bdff-4be0-9805-427637dd1d77" />
 
@@ -55,8 +55,3 @@ I use a Elfin EW11 modbus adapter from AliExpress.
 ## issues
 * Minor issue: Not reading fan state Cooker Hood. 
 * 
-
-## todo
-* Add norwegian language. I did a small test but did not get it to switch.
-* Perhaps rename entities for grouping? Will mess up for users, and a prefix is not pretty. I guess not unless wanted.
-* add more sensors, alarms.
