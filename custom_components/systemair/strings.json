@@ -2,7 +2,7 @@
   "config": {
     "step": {
       "user": {
-        "title": "Setup VSR300 Ventilation",
+        "title": "Setup Systemair Ventilation",
         "data": {
           "name": "Integration Name",
           "host": "IP Address",

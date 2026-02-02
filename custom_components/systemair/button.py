@@ -1,65 +1,65 @@
 import asyncio
 import logging
 from homeassistant.components.button import ButtonEntity
-from homeassistant.const import CONF_MODEL, CONF_NAME
+from homeassistant.const import CONF_MODEL
 from homeassistant.components.modbus.const import CALL_TYPE_WRITE_REGISTER
 from .const import DOMAIN, CONF_SLAVE
 
 _LOGGER = logging.getLogger(__name__)
 
+# --- ACTION MAPPINGS ---
+# (TranslationKey, ModeValue, SpeedValue)
 VENT_ACTIONS = {
-    "Normal Mode": (2, 3),
-    "Low Speed": (2, 2),
-    "High Speed": (2, 4),
-    "Fireplace": (5, None),
-    "Refresh": (4, None),
-    "Crowded": (3, None),
-    "Away": (6, None),
-    "Auto": (1, None),
-    "Stop Unit": (0, None),
+    "btn_normal_mode": (2, 3),
+    "btn_low_speed": (2, 2),
+    "btn_high_speed": (2, 4),
+    "btn_fireplace": (5, None),
+    "btn_refresh": (4, None),
+    "btn_crowded": (3, None),
+    "btn_away": (6, None),
+    "btn_auto": (1, None),
+    "btn_stop": (0, None),
 }
 
 async def async_setup_entry(hass, entry, async_add_entities):
-    """Set up SaveVSR buttons from a config entry."""
+    """Set up SystemAir buttons from a config entry."""
     config = entry.data
-    hub_name = config.get("hub_name", "modbus_hub")
-    
     from homeassistant.components.modbus import get_hub
-    hub = get_hub(hass, hub_name)
+    hub = get_hub(hass, config.get("hub_name", "modbus_hub"))
     
     if hub is None:
-        _LOGGER.error("SaveVSR: Modbus hub '%s' not found for buttons", hub_name)
+        _LOGGER.error("SystemAir: Modbus hub not found for buttons")
         return
 
     model = config.get(CONF_MODEL, "SAVE")
     slave = config.get(CONF_SLAVE, 1)
 
     entities = [
-        SaveVSRButton(hub, model, slave, name, mode, speed)
-        for name, (mode, speed) in VENT_ACTIONS.items()
+        SystemAirButton(hub, model, slave, key, mode, speed)
+        for key, (mode, speed) in VENT_ACTIONS.items()
     ]
     
     async_add_entities(entities)
 
-class SaveVSRButton(ButtonEntity):
-    """Generic SaveVSR Action Button."""
+class SystemAirButton(ButtonEntity):
+    """Generic SystemAir Action Button using translation keys."""
     
     _attr_has_entity_name = True
 
-    def __init__(self, hub, model, slave, name, mode_val, speed_val):
+    def __init__(self, hub, model, slave, translation_key, mode_val, speed_val):
         self._hub = hub
         self._slave = slave
         self._model = model
         self._mode_val = mode_val
         self._speed_val = speed_val
         
-        self._attr_name = name
-        self._attr_unique_id = f"{DOMAIN}_{slave}_btn_{name.lower().replace(' ', '_')}"
+        # Bruker translation_key i stedet for fast navn
+        self._attr_translation_key = translation_key
+        self._attr_unique_id = f"{DOMAIN}_{slave}_btn_{translation_key}"
         self._attr_icon = "mdi:play-box-outline"
 
     @property
     def device_info(self):
-        """Unified device info to match all other SaveVSR entities."""
         return {
             "identifiers": {(DOMAIN, f"{self._model}_{self._slave}")},
             "name": f"Systemair {self._model}",
@@ -68,27 +68,14 @@ class SaveVSRButton(ButtonEntity):
         }
 
     async def async_press(self) -> None:
-        """Handle the button press to trigger ventilation modes."""
+        """Handle the button press."""
         try:
-            # 1. Write the Mode Register (1161)
-            _LOGGER.debug("SaveVSR Button: Writing Mode %s to 1161", self._mode_val)
-            await self._hub.async_pb_call(
-                self._slave, 
-                1161, 
-                self._mode_val, 
-                CALL_TYPE_WRITE_REGISTER
-            )
+            # 1. Skriv til Modus-register (1161)
+            await self._hub.async_pb_call(self._slave, 1161, self._mode_val, CALL_TYPE_WRITE_REGISTER)
             
-            # 2. Write Fan Speed (1130) if a specific speed is required for this action
+            # 2. Skriv viftehastighet hvis nødvendig
             if self._speed_val is not None:
-                # Modbus often needs a small breath between sequential writes
                 await asyncio.sleep(1.0)
-                _LOGGER.debug("SaveVSR Button: Writing Speed %s to 1130", self._speed_val)
-                await self._hub.async_pb_call(
-                    self._slave, 
-                    1130, 
-                    self._speed_val, 
-                    CALL_TYPE_WRITE_REGISTER
-                )
+                await self._hub.async_pb_call(self._slave, 1130, self._speed_val, CALL_TYPE_WRITE_REGISTER)
         except Exception as e:
-            _LOGGER.error("SaveVSR Button '%s' failed: %s", self._attr_name, e)
+            _LOGGER.error("SystemAir Button '%s' failed: %s", self._attr_translation_key, e)

@@ -3,23 +3,24 @@ from homeassistant import config_entries
 from homeassistant.const import CONF_MODEL
 from .const import DOMAIN, CONF_SLAVE
 
-# Define the models your integration supports
+
 SUPPORTED_MODELS = [
-    "VSR 300",
-    "VSR 400",  
-    "VSR 500",
-    "VTR 300",
-    "VTR 500",
-#    "VTC 300",
-#    "VTC 700",
+    "VSR 300", "VSR 400", "VSR 500",   
+    "VTR 300", "VTR 400", "VTR 500",  
+    "VTC 300", "VTC 500", "VTC 700",
 ]
+
+# The code was originally created and tested for the VSR300.
+# All of them are supported, but bigger models can have alternative sensor ranges based on selected model.
+# This must be added on request. 
+# The VTC have a bypass opening instead of heat converter. This is not added into the code per 2.2.26
 
 class SaveVSRConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a generic config flow for SaveVSR."""
     VERSION = 1
 
     async def async_step_user(self, user_input=None):
-        """Initial step for the SaveVSR setup."""
+        """Initial step for the Systemair setup."""
         if user_input is not None:
             # title shows up in the 'Integrations' list card
             return self.async_create_entry(

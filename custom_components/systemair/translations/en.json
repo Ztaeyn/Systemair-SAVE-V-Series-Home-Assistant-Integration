@@ -1,0 +1,230 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Systemair Ventilation Unit Setup",
+        "description": "Please enter Modbus details. Ensure the Modbus Hub is already configured in your configuration.yaml.",
+        "data": {
+          "model": "Device Model",
+          "hub_name": "Modbus Hub Name",
+          "slave": "Modbus Slave ID"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Could not connect to Modbus hub",
+      "invalid_auth": "Invalid authentication",
+      "unknown": "An unexpected error occurred"
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "a_alarm": { "name": "A-alarm" },
+      "b_alarm": { "name": "B-alarm" },
+      "c_alarm": { "name": "C-alarm" },
+      "filter_alarm": { "name": "Filter Alarm" },
+      "temp_low_alarm": { "name": "Low Supply Temperature Alarm" },
+      "hood_status": { "name": "Kitchen Hood Status" },
+      "free_cooling": { "name": "Free Cooling Active" },
+      "triac_signal": { "name": "TRIAC Control Signal" },
+      "maintenance_mode": { "name": "Maintenance Mode Active" }
+    },
+    "button": {
+      "btn_normal_mode": { "name": "Normal Mode" },
+      "btn_low_speed": { "name": "Low Speed" },
+      "btn_high_speed": { "name": "High Speed" },
+      "btn_fireplace": { "name": "Fireplace Mode" },
+      "btn_refresh": { "name": "Refresh/Ventilation" },
+      "btn_crowded": { "name": "Crowded Mode" },
+      "btn_away": { "name": "Away Mode" },
+      "btn_auto": { "name": "Auto" },
+      "btn_stop": { "name": "Stop Unit" }
+    },
+    "climate": {
+      "save_vsr": {
+        "state_attributes": {
+          "preset_mode": {
+            "auto": "Auto",
+            "manual_low": "Manual Low",
+            "manual_normal": "Manual Normal",
+            "manual_high": "Manual High",
+            "crowded": "Crowded",
+            "refresh": "Refresh",
+            "fireplace": "Fireplace",
+            "away": "Away",
+            "holiday": "Holiday"
+          }
+        }
+      }
+    },
+    "number": {
+      "supply_air_setpoint": { "name": "Supply Air Setpoint" },
+      "holiday_duration": { "name": "Holiday Mode Duration" },
+      "away_duration": { "name": "Away Mode Duration" },
+      "fireplace_duration": { "name": "Fireplace Mode Duration" },
+      "refresh_duration": { "name": "Refresh Duration" },
+      "crowded_duration": { "name": "Crowded Mode Duration" },
+      "eco_offset": { "name": "Eco Mode Heat Offset" },
+      "exhaust_setpoint": { "name": "Extract Air Setpoint" },
+      "exhaust_min_setpoint": { "name": "Min Extract Setpoint" },
+      "exhaust_max_setpoint": { "name": "Max Extract Setpoint" },
+      "fan_comp_read": { "name": "Fan Compensation (Read)" },
+      "fan_comp_winter": { "name": "Fan Compensation (Winter)" },
+      "winter_comp_temp": { "name": "Winter Comp. Check Temp" },
+      "winter_comp_start": { "name": "Winter Comp. Start Temp" },
+      "winter_comp_max": { "name": "Winter Comp. Max Temp" },
+      "fan_comp_summer": { "name": "Fan Compensation (Summer)" },
+      "summer_comp_start": { "name": "Summer Comp. Start Temp" },
+      "summer_comp_max": { "name": "Summer Comp. Max Temp" },
+      "sf_min_rpm": { "name": "Supply Fan Min RPM" },
+      "ef_min_rpm": { "name": "Extract Fan Min RPM" },
+      "sf_low_rpm": { "name": "Supply Fan Low RPM" },
+      "ef_low_rpm": { "name": "Extract Fan Low RPM" },
+      "sf_normal_rpm": { "name": "Supply Fan Normal RPM" },
+      "ef_normal_rpm": { "name": "Extract Fan Normal RPM" },
+      "sf_high_rpm": { "name": "Supply Fan High RPM" },
+      "ef_high_rpm": { "name": "Extract Fan High RPM" },
+      "sf_max_rpm": { "name": "Supply Fan Max RPM" },
+      "ef_max_rpm": { "name": "Extract Fan Max RPM" },
+      "sf_holiday_setpoint": { "name": "Supply Fan Holiday Setpoint" },
+      "ef_holiday_setpoint": { "name": "Extract Fan Holiday Setpoint" },
+      "sf_hood_setpoint": { "name": "Supply Fan Kitchen Hood Setpoint" },
+      "ef_hood_setpoint": { "name": "Extract Fan Kitchen Hood Setpoint" },
+      "sf_vacuum_setpoint": { "name": "Supply Fan Vacuum Setpoint" },
+      "ef_vacuum_setpoint": { "name": "Extract Fan Vacuum Setpoint" },
+      "moisture_setpoint": { "name": "Dehumidification Setpoint" },
+      "filter_interval": { "name": "Filter Change Interval" },
+      "fc_outdoor_day_min": { "name": "Free Cooling Day Min Outdoor Temp" },
+      "fc_outdoor_night_high": { "name": "Free Cooling Night Upper Limit" },
+      "fc_outdoor_night_low": { "name": "Free Cooling Night Lower Limit" },
+      "fc_indoor_low_limit": { "name": "Free Cooling Indoor Day Lower Limit" },
+      "sched_active_offset": { "name": "Scheduled Active Temp Offset" },
+      "sched_inactive_offset": { "name": "Scheduled Inactive Temp Offset" }
+    },
+    "select": {
+      "ventilation_mode": {
+        "name": "Ventilation Mode",
+        "state": {
+          "manual_low": "Manual Low",
+          "manual_normal": "Manual Normal",
+          "manual_high": "Manual High",
+          "auto": "Auto",
+          "crowded": "Crowded",
+          "refresh": "Refresh",
+          "fireplace": "Fireplace",
+          "away": "Away",
+          "holiday": "Holiday"
+        }
+      },
+      "crowded_supply_level": { "name": "Crowded - Supply Level" },
+      "crowded_extract_level": { "name": "Crowded - Extract Level" },
+      "refresh_supply_level": { "name": "Refresh - Supply Level" },
+      "refresh_extract_level": { "name": "Refresh - Extract Level" },
+      "fireplace_supply_level": { "name": "Fireplace - Supply Level" },
+      "fireplace_extract_level": { "name": "Fireplace - Extract Level" },
+      "free_cooling_supply": { "name": "Free Cooling - Supply Level" },
+      "free_cooling_extract": { "name": "Free Cooling - Extract Level" },
+      "away_supply_level": { "name": "Away - Supply Level" },
+      "away_extract_level": { "name": "Away - Extract Level" },
+      "holiday_supply_level": { "name": "Holiday - Supply Level" },
+      "holiday_extract_level": { "name": "Holiday - Extract Level" },
+      "temp_control_mode": { 
+        "name": "Temperature Control Mode",
+        "state": { "supply": "Supply Air", "room": "Room", "extract": "Extract Air" }
+      },
+      "sched_airflow_level": { "name": "Schedule - Fan Level" },
+      "unsched_airflow_level": { "name": "Off-Schedule - Fan Level" }
+    },
+    "sensor": {
+      "outdoor_temp": { "name": "Outdoor Temperature" }, 
+      "supply_temp": { "name": "Supply Temperature" }, 
+      "eff_temp": { "name": "Exhaust Air Temperature (Unit Outlet)" }, 
+      "overheat_temp": { "name": "Supply Temperature Overheat" }, 
+      "exhaust_temp": { "name": "Extract Temperature (Room Outlet)" }, 
+      "sf_rpm": { "name": "Supply Fan RPM" },
+      "ef_rpm": { "name": "Extract Fan RPM" },
+      "sf_speed_pct": { "name": "Supply Fan Load (%)" },
+      "ef_speed_pct": { "name": "Extract Fan Load (%)" },
+      "heat_recovery_efficiency": { "name": "Heat Exchanger Efficiency" },
+      "heater_pct": { "name": "Heating Element Load" }, 
+      "heater_watts": { "name": "Heating Element Power" }, 
+      "filter_time_rem": { "name": "Next Filter Change" },
+      "summer_winter": {
+        "name": "Summer/Winter Operation",
+        "state": {
+          "summer": "Summer",
+          "winter": "Winter"
+        }
+      },
+      "fan_mode": {
+        "name": "Current Fan Mode",
+        "state": {
+          "auto_low": "Auto Low",
+          "auto_normal": "Auto Normal",
+          "auto_high": "Auto High",
+          "manual_stop": "Manual Stop",
+          "manual_low": "Manual Low",
+          "manual_normal": "Manual Normal",
+          "manual_high": "Manual High",
+          "crowded": "Crowded",
+          "refresh": "Ventilation",
+          "fireplace": "Fireplace",
+          "away": "Away",
+          "holiday": "Holiday",
+          "cooker_hood": "Cooker Hood"
+        }
+      }
+    },
+    "switch": {
+      "eco_mode": { "name": "Eco Mode" },
+      "free_cooling": { "name": "Free Cooling" },
+      "fan_stop_allowed": { "name": "Manual Fan Stop Allowed" },
+      "mon_p1": { "name": "Monday Period 1" },
+      "mon_p2": { "name": "Monday Period 2" },
+      "tue_p1": { "name": "Tuesday Period 1" },
+      "tue_p2": { "name": "Tuesday Period 2" },
+      "wed_p1": { "name": "Wednesday Period 1" },
+      "wed_p2": { "name": "Wednesday Period 2" },
+      "thu_p1": { "name": "Thursday Period 1" },
+      "thu_p2": { "name": "Thursday Period 2" },
+      "fri_p1": { "name": "Friday Period 1" },
+      "fri_p2": { "name": "Friday Period 2" },
+      "sat_p1": { "name": "Saturday Period 1" },
+      "sat_p2": { "name": "Saturday Period 2" },
+      "sun_p1": { "name": "Sunday Period 1" },
+      "sun_p2": { "name": "Sunday Period 2" }
+    },
+    "time": {
+      "fc_start": { "name": "Free Cooling Start Time" },
+      "fc_end": { "name": "Free Cooling End Time" },
+      "mon_p1_start": { "name": "Monday Period 1 Start" },
+      "mon_p1_end": { "name": "Monday Period 1 End" },
+      "mon_p2_start": { "name": "Monday Period 2 Start" },
+      "mon_p2_end": { "name": "Monday Period 2 End" },
+      "tue_p1_start": { "name": "Tuesday Period 1 Start" },
+      "tue_p1_end": { "name": "Tuesday Period 1 End" },
+      "tue_p2_start": { "name": "Tuesday Period 2 Start" },
+      "tue_p2_end": { "name": "Tuesday Period 2 End" },
+      "wed_p1_start": { "name": "Wednesday Period 1 Start" },
+      "wed_p1_end": { "name": "Wednesday Period 1 End" },
+      "wed_p2_start": { "name": "Wednesday Period 2 Start" },
+      "wed_p2_end": { "name": "Wednesday Period 2 End" },
+      "thu_p1_start": { "name": "Thursday Period 1 Start" },
+      "thu_p1_end": { "name": "Thursday Period 1 End" },
+      "thu_p2_start": { "name": "Thursday Period 2 Start" },
+      "thu_p2_end": { "name": "Thursday Period 2 End" },
+      "fri_p1_start": { "name": "Friday Period 1 Start" },
+      "fri_p1_end": { "name": "Friday Period 1 End" },
+      "fri_p2_start": { "name": "Friday Period 2 Start" },
+      "fri_p2_end": { "name": "Friday Period 2 End" },
+      "sat_p1_start": { "name": "Saturday Period 1 Start" },
+      "sat_p1_end": { "name": "Saturday Period 1 End" },
+      "sat_p2_start": { "name": "Saturday Period 2 Start" },
+      "sat_p2_end": { "name": "Saturday Period 2 End" },
+      "sun_p1_start": { "name": "Sunday Period 1 Start" },
+      "sun_p1_end": { "name": "Sunday Period 1 End" },
+      "sun_p2_start": { "name": "Sunday Period 2 Start" },
+      "sun_p2_end": { "name": "Sunday Period 2 End" }
+    }
+  }
+}
