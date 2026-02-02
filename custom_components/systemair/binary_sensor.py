@@ -24,7 +24,7 @@ SYSTEMAIR_BOOLEANS = [
     ("free_cooling", 4110, BinarySensorDeviceClass.RUNNING, "mdi:snowflake-check", None),
 
     # SYSTEM STATUS
-    ("triac_signal", 14380, BinarySensorDeviceClass.POWER, "mdi:sine-wave", EntityCategory.DIAGNOSTIC),
+    ("triac_signal", 14380, None, "mdi:sine-wave", EntityCategory.DIAGNOSTIC),
     ("maintenance_mode", 15000, None, "mdi:wrench-clock", EntityCategory.DIAGNOSTIC), 
 ]
 
