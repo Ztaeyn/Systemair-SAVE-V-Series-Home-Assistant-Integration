@@ -41,18 +41,26 @@
       "btn_stop": { "name": "Stopp aggregat" }
     },
     "climate": {
-      "save_vsr": {
+      "systemair_climate": {
+        "name": "Klimakontroll",
+        "state": {
+          "heat": "Varme",
+          "fan_only": "Kun vifte",
+          "off": "Av"
+        },
         "state_attributes": {
           "preset_mode": {
-            "auto": "Auto",
-            "manual_low": "Manuell lav",
-            "manual_normal": "Manuell normal",
-            "manual_high": "Manuell høy",
-            "crowded": "Selskap",
-            "refresh": "Utlufting",
-            "fireplace": "Peisfyring",
-            "away": "Borte",
-            "holiday": "Ferie"
+            "state": {
+              "auto": "Auto",
+              "manual_low": "Manuell lav",
+              "manual_normal": "Manuell normal",
+              "manual_high": "Manuell høy",
+              "crowded": "Selskap",
+              "refresh": "Utlufting",
+              "fireplace": "Peisfyring",
+              "away": "Borte",
+              "holiday": "Ferie"
+            }
           }
         }
       }

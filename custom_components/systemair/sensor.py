@@ -42,7 +42,7 @@ SYSTEMAIR_SENSORS = [
 
     # --- System Status & Energy ---
     ("fan_mode", 1160, None, None, 1.0, "mdi:air-conditioner", None),
-    ("mode_time_rem", 1111, None, "min", 1.0, "mdi:timer-sand", None), 
+    ("mode_time_rem", 1111, None, None, 1.0, "mdi:timer-sand", None),
     ("summer_winter", 1038, None, None, 1, "mdi:sun-snowflake-variant", None),
     ("heat_recovery_efficiency", 14102, SensorDeviceClass.POWER_FACTOR, "%", 1.0, "mdi:sync", SensorStateClass.MEASUREMENT),
     ("heater_pct", 2148, None, "%", 1.0, "mdi:heating-coil", SensorStateClass.MEASUREMENT),
@@ -133,7 +133,34 @@ class SystemairSensor(SensorEntity):
                     self._state = round(total_seconds / 86400, 1)
                 return
 
-            # 4. Standard Logic
+            # 4. Mode Time Remaining (Dynamic Formatting)
+            if self._register == 1111:
+                res_l = await self._hub.async_pb_call(self._slave, 1110, 1, CALL_TYPE_REGISTER_INPUT)
+                res_h = await self._hub.async_pb_call(self._slave, 1111, 1, CALL_TYPE_REGISTER_INPUT)
+                
+                if res_l and res_h and hasattr(res_l, 'registers'):
+                    total_sec = (res_h.registers[0] << 16) + res_l.registers[0]
+                    
+                    if total_sec <= 0:
+                        self._state = "Inaktiv" # Or "Av"
+                    elif total_sec < 3600:
+                        # Less than an hour: show minutes
+                        self._state = f"{total_sec // 60} min."
+                    elif total_sec < 86400:
+                        # Less than a day: show hours and remaining minutes
+                        h = total_sec // 3600
+                        m = (total_sec % 3600) // 60
+                        self._state = f"{h}t {m}m"
+                    else:
+                        # More than a day: show days and hours
+                        d = total_sec // 86400
+                        h = (total_sec % 86400) // 3600
+                        self._state = f"{d} dager {h}t"
+                else:
+                    self._state = None
+                return
+
+            # 5. Standard Logic
             is_input = (12000 <= self._register <= 16000)
             call_type = CALL_TYPE_REGISTER_INPUT if is_input else CALL_TYPE_REGISTER_HOLDING
             result = await self._hub.async_pb_call(self._slave, self._register, 1, call_type)

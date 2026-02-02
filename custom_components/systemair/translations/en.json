@@ -41,22 +41,30 @@
       "btn_stop": { "name": "Stop Unit" }
     },
     "climate": {
-      "save_vsr": {
+      "systemair_climate": {
+        "name": "Climate Control",
+        "state": {
+          "heat": "Heat",
+          "fan_only": "Fan Only",
+          "off": "Off"
+        },
         "state_attributes": {
           "preset_mode": {
-            "auto": "Auto",
-            "manual_low": "Manual Low",
-            "manual_normal": "Manual Normal",
-            "manual_high": "Manual High",
-            "crowded": "Crowded",
-            "refresh": "Refresh",
-            "fireplace": "Fireplace",
-            "away": "Away",
-            "holiday": "Holiday"
+            "state": {
+              "auto": "Auto",
+              "manual_low": "Manual Low",
+              "manual_normal": "Manual Normal",
+              "manual_high": "Manual High",
+              "crowded": "Crowded",
+              "refresh": "Refresh",
+              "fireplace": "Fireplace",
+              "away": "Away",
+              "holiday": "Holiday"
+            }
           }
         }
       }
-    },
+    }, 
     "number": {
       "supply_air_setpoint": { "name": "Supply Air Setpoint" },
       "holiday_duration": { "name": "Holiday Mode Duration" },
