@@ -12,12 +12,12 @@ from .const import DOMAIN, CONF_SLAVE
 
 _LOGGER = logging.getLogger(__name__)
 
-# List: (Name, Hour_Register, Minute_Register)
+# List: (TranslationKey, Hour_Register, Minute_Register)
 TIME_SETTINGS = [
     ("fc_start", 4105, 4106),
     ("fc_end", 4107, 4108),
-    # Weekly Schedule
-    ("mon_p1_start", 5002, 5003), ("mon_p2_end", 5004, 5005),
+    # Weekly Schedule - Fixed the mon_p1_end typo here
+    ("mon_p1_start", 5002, 5003), ("mon_p1_end", 5004, 5005), 
     ("mon_p2_start", 5006, 5007), ("mon_p2_end", 5008, 5009),
     ("tue_p1_start", 5010, 5011), ("tue_p1_end", 5012, 5013),
     ("tue_p2_start", 5014, 5015), ("tue_p2_end", 5016, 5017),
@@ -56,14 +56,15 @@ class SaveTime(TimeEntity):
     
     _attr_has_entity_name = True
 
-    def __init__(self, hub, model, slave, name, hr_reg, min_reg):
+    def __init__(self, hub, model, slave, translation_key, hr_reg, min_reg):
         self._hub = hub
         self._slave = slave
         self._model = model
         self._hr_reg = hr_reg
         self._min_reg = min_reg
         
-        self._attr_name = name
+        # Changed from self._attr_name to self._attr_translation_key
+        self._attr_translation_key = translation_key
         self._attr_unique_id = f"{DOMAIN}_{slave}_time_{hr_reg}"
         self._attr_entity_category = EntityCategory.CONFIG
         self._attr_native_value = None
@@ -81,13 +82,14 @@ class SaveTime(TimeEntity):
         """Write hour and minute registers."""
         try:
             await self._hub.async_pb_call(self._slave, self._hr_reg, value.hour, CALL_TYPE_WRITE_REGISTER)
-            await asyncio.sleep(0.3) # Wait for unit to process
+            await asyncio.sleep(0.3) 
             await self._hub.async_pb_call(self._slave, self._min_reg, value.minute, CALL_TYPE_WRITE_REGISTER)
             
             self._attr_native_value = value
             self.async_write_ha_state()
         except Exception as e:
-            _LOGGER.error("Systemair: Failed to set %s: %s", self._attr_name, e)
+            # Updated to use translation_key for logging
+            _LOGGER.error("Systemair: Failed to set %s: %s", self._attr_translation_key, e)
 
     async def async_update(self):
         """Read time registers."""
@@ -102,5 +104,6 @@ class SaveTime(TimeEntity):
                 else:
                     self._attr_native_value = None
         except Exception as e:
-            _LOGGER.error("Systemair: Time update failed for %s: %s", self._attr_name, e)
+            # Updated to use translation_key for logging
+            _LOGGER.error("Systemair: Time update failed for %s: %s", self._attr_translation_key, e)
             self._attr_native_value = None

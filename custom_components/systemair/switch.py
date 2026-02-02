@@ -61,7 +61,8 @@ class SaveSwitch(SwitchEntity):
         self._model = model
         self._register = register
         
-        self._attr_name = name
+        # Change self._attr_name to self._attr_translation_key
+        self._attr_translation_key = name  
         self._attr_icon = icon
         self._attr_entity_category = category
         self._attr_unique_id = f"{DOMAIN}_{slave}_sw_{register}"
@@ -97,4 +98,4 @@ class SaveSwitch(SwitchEntity):
             if result and hasattr(result, 'registers'):
                 self._attr_is_on = (result.registers[0] == 1)
         except Exception as e:
-            _LOGGER.error("Systemair: Update failed for switch %s: %s", self._attr_name, e)
+            _LOGGER.error("Systemair: Update failed for switch %s: %s", self._attr_translation_key, e)
