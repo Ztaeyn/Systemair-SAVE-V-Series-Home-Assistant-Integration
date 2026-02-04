@@ -54,10 +54,6 @@ I use the **Spook** integration myself for removing old entities.
 2. Click **Add Integration** and search for **Systemair Save**
 3. Follow the config flow. Select your model. Hub name and Slave ID 
 
-# Systemair VSR/VTR/VTC 300/400/500+"Most of the other sizes" Integration for Home Assistant
-Note: The code is designed and tested on a VSR300 but will work for the others as well, but minor changes as sensor range for bigger fans etc etc can be coded in by request, so that the integration switches to the correct sensor data.
-This integration will show  up as a Systemair device.
-
 ## 🌍 Translations & Entity IDs
 This integration is built with ~~full~~ much on the way translation support.
 1. Entity IDs remain ~~stable~~ and technical (e.g., sensor.systemair_1_away_mode). **Work in progress or local issue, the entity IDs turn to norwegian for me. This is unwanted** 
