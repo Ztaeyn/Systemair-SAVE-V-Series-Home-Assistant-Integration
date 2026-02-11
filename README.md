@@ -1,62 +1,73 @@
-# Systemair VSR/VTR 300/400/500 Integration for Home Assistant
-Note: It it designed for VSR300 but will work for the others as well. VTC devices should work too, but never heard of them, and deactivated the selection for now.
-*A breaking change for release 1.3 lets you select your device, VSR500, VTR400 etc. It then creates the sensors based on this. Tough luck switching between them...
+# Systemair SAVE Modbus Integration for Home Assistant
 
-You will need to delete the integration and readd as it has renamed folders etc, to be more generic towards VxR.
+[![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)
+[![GitHub Release](https://img.shields.io/github/v/release/Ztaeyn/Systemair-SAVE-V-Series-Home-Assistant-Integration)](https://github.com/Ztaeyn/Systemair-SAVE-V-Series-Home-Assistant-Integration/releases)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
-*Still some work in progress.
-** Note that the larger 400 and 500 systems have bigger fans etc, so some sensors will need to be adjusted based on what system you select. That is not included as of 1.3, except a test on two flow rate sensors.
-
-## Information
-I wanted to try to make the former YAML package into a integration using Python, which I want to learn for fun. I code on PLC's for work, so I can read much of the python language, but I can't write it. I've used Gemini  to help me convert my YAML code, so this is technically vibe-coding.
-It's been fun, and I hope to use it as motivation to finish a python course.
-
-## What it does
-If you have not connected your VSR300 to Home Assistant before, this integration lets you control and monitor the system.
-Cut short, it lets you
-* Control what you normally see on the VSR Care HMI screen
-* Set fan modes
-* Configure setpoints for duration
-* Configure fan speeds
-* See filter replacemnt
-* See alarms
-
-### Device elements
-The device added by the integration is separated into
-* Controls - The typical daily usage
-* Sensors - Information, non controllable
-* Configuration - Elements you normally don't change more than once.
-
-* ### Free Cooling
-* Set temperature limits for start/stop, time schedule.
+This integration provides local control of **Systemair SAVE** ventilation units...
+This integration provides you remote control of the Systemair Save ventilation units (VSR, VTR, VTC and perhaps even VR series). It allows you to monitor sensors, adjust climate settings, adn manage weekly schedules directly from Home Assistant. How about pairing it up with a humidity sensor in the bathroom to automatically trigger the Refresh?
+<img width="1185" height="341" alt="image" src="https://github.com/user-attachments/assets/6fffd555-bdc1-4ac9-b2ed-65477f09f5b5" />
 
 
-## Installation
-I did not manage for now to make it install without editing files, as it seems I would have to provide the modbus interface myself. So for now you need to add the modbus interface to the configuration.yaml.
+# Features
+* Full Climate Control: Set target temperature and switch between modes (Auto, Manual, Away, Crowded, etc.).
+* Comprehensive Sensors: Real-time data for all temperature probes, fan speeds (RPM), humidity, and heat recovery efficiency.
+* Alarms & Diagnostics: Binary sensors for A/B/C alarms and filter change alerts.
+* Weekly Schedule: Adjust start/stop times for internal schedules.
+* Model Support: Verified for VSR 300/400/500, VTR 300/400/500, VTC 300/700, and VR 700 DCV.
+* Norwegian (thats me) and English translation.
 
-0. Prereq: HACS
-1. Add the modbus configuration to your HA server. See the file "your_configuration.yaml"
-2. In the HACS meny press the top right tree dot menu, and Custom Repos, and add https://github.com/Ztaeyn/HA-VSR300-modbus-python-integration as category Integration.
-3. Search for Systemair VSR300 and click download.
-4. Restart Home Assistant
-5. Now go to Devices and add new integration and search for Systemair VSR300 and add it.
-6. It should now be available as a device under Home Assistant.
+# 🛠 Installation
+## 1. Modbus adapter
+I assume there is a multitude of various modbus adapters you can use. I use an Elfin EW11 myself. (From Aliexpress)
 
-<img width="1124" height="776" alt="image" src="https://github.com/user-attachments/assets/616d7609-bdff-4be0-9805-427637dd1d77" />
+## 2.Prerequisites
+Manually configure your **configuration.yaml**. 
+```yaml
+modbus:
+  - name: "save_hub"      # Your HUB ID. If you have multiple devices, this must be a unique name.
+    type: tcp
+    host: 192.168.10.101  # Your unit's IP address
+    port: 8432            # Your Modbus port (often 502 or 8432)
+    sensors:
+      - name: "Systemair Link"  # This is a kind of lifeline for the integration.
+        address: 12101
+        slave: 1
+```
+And if you have installed the older YAML version (or an early version of this python integration) you must remove and probably purge out the old entities from your HA, as well remove and readd the python integration as I renamed it. 
+I use the **Spook** integration myself for removing old entities. 
 
-Note. If you previously used the YAML package you will have to remove it first, and the resulting broken entities. I used the Spook integration for removing dead entities. Use at your own risk.
+## 3A. Installation via HACS (recommended)
+1. Open **HACS** in Home Assistant.
+2. Click the three dots in the top right corner and select **Custom repositories**.
+3. Paste the URL of this GitHub repository.
+4. Select **Integration** as the category and click **Add**.
+5. Restart Home Assistant.
 
+## 3B. Alternative Manual installation
+1. Download source code.zip from releases
+2. Unzip and place the systemair folder under Home assistant folder "Custom components".
+3. Restart Home assistant
 
-## Hardware 
-I use a Elfin EW11 modbus adapter from AliExpress.
+## 4. Setup
+1. Go to **Settings** -> **Devices & Services**.
+2. Click **Add Integration** and search for **Systemair Save**
+3. Follow the config flow. Select your model. Hub name and Slave ID 
 
+## 🌍 Translations & Entity IDs
+This integration is built with ~~full~~ much on the way translation support.
+1. Entity IDs remain ~~stable~~ and technical (e.g., sensor.systemair_1_away_mode). **Work in progress or local issue, the entity IDs turn to norwegian for me. This is unwanted** 
+2. Friendly Names will automatically translate to English or Norwegian based on your Home Assistant language settings. **More languages can be added. Download the **en/nb.json** and translate it, and add it under the **Systemair/Translations** folder, and when you are happy with it, PM me with a copy if you want it included :)
+3. One thing of **note**. Right now Units are hardcoded to norwegian. I can look at making it follow the set language as well, but I took the quick route right now. Please tell me. (if anyone reads this).
 
+## ⚖️ License
+This project is licensed under the GNU GPLv3 - see the LICENSE file for details.
 
-## issues
-* Minor issue: Not reading fan state Cooker Hood. 
-* 
+## 🤝 Contributing
+If you own a VTC or VR model and find that certain sensors are missing or need scaling adjustments, please open an Issue or submit a Pull Request.
+My personal time off also varies, after the kids fall asleep I prefer chilling with the Steam Deck than sitting in front of the computer.
 
-## todo
-* Add norwegian language. I did a small test but did not get it to switch.
-* Perhaps rename entities for grouping? Will mess up for users, and a prefix is not pretty. I guess not unless wanted.
-* add more sensors, alarms.
+## Notice of Vibe coding
+Most of the integration is a hybrid of vibe coding. I mostly work with PLC coding, but have wanted to learn python (and C#) but lack of willpower after long work days killed that motivation.
+So after my other repo with the YAML version of this was marked for some needed changes due to HA changed parts of the modbus, I felt eager to try it out as a python integration.
+So I've used Gemini to help me out, it's been fun, I got it up working but lots of fiddling around. Now I just need to keep at it and restart the python course I once bought at Udemy.

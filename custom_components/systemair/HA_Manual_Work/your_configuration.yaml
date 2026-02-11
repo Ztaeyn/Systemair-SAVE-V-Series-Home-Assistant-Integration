@@ -1,9 +1,0 @@
-modbus:
-  - name: "save_hub"
-    type: tcp
-    host: 192.168.10.101  #user specific
-    port: 8432            #user specific
-    sensors:
-      - name: "VSR Link"
-        address: 12101
-        slave: 1
