@@ -12,17 +12,18 @@ from .const import DOMAIN, CONF_SLAVE
 
 _LOGGER = logging.getLogger(__name__)
 
-# --- MAPPINGS (Nøkler som må finnes i JSON) ---
+# --- MAPPINGS (Basert på dine testede verdier) ---
+# Register 1161: 0=Manual/Stop, 1=Auto, 3=Crowded, 4=Refresh, 5=Fireplace, 6=Away, 7=Holiday
 VENTILATION_MODES = {
-    "manual_low": (1, 2),
-    "manual_normal": (1, 3),
-    "manual_high": (1, 4),
-    "auto": (0, None),      
-    "crowded": (2, None),
-    "refresh": (3, None),
-    "fireplace": (4, None),
-    "away": (5, None),
-    "holiday": (6, None),
+    "auto": (1, None),
+    "manual_low": (2, 2),
+    "manual_normal": (2, 3),
+    "manual_high": (2, 4),
+    "crowded": (3, None),
+    "refresh": (4, None),
+    "fireplace": (5, None),
+    "away": (6, None),
+    "holiday": (7, None),
 }
 
 AIRFLOW_LEVELS = {"normal": 3, "high": 4, "maximum": 5}
@@ -135,29 +136,37 @@ class SystemairVentModeSelect(SelectEntity):
     async def async_select_option(self, option: str) -> None:
         mode_val, speed_val = VENTILATION_MODES[option]
         try:
+            # 1. Sett User Mode (1161)
             await self._hub.async_pb_call(self._slave, 1161, mode_val, CALL_TYPE_WRITE_REGISTER)
+            
+            # 2. Sett Viftehastighet hvis relevant (1130)
             if speed_val is not None:
                 await asyncio.sleep(1.0) 
                 await self._hub.async_pb_call(self._slave, 1130, speed_val, CALL_TYPE_WRITE_REGISTER)
+            
             self._attr_current_option = option
             self.async_write_ha_state()
         except Exception as e:
             _LOGGER.error("Systemair: Failed to set ventilation mode %s: %s", option, e)
 
     async def async_update(self):
+        """Leser status fra 1160 og 1130 for å oppdatere menyen."""
         try:
             res_mode = await self._hub.async_pb_call(self._slave, 1160, 1, CALL_TYPE_REGISTER_INPUT)
             res_speed = await self._hub.async_pb_call(self._slave, 1130, 1, CALL_TYPE_REGISTER_HOLDING)
 
             if res_mode and hasattr(res_mode, 'registers'):
                 m_val = res_mode.registers[0]
-                s_val = res_speed.registers[0] if res_speed and hasattr(res_speed, 'registers') else None
-
+                s_val = res_speed.registers[0] if res_speed and hasattr(res_speed, 'registers') else 3
+                
                 if m_val == 0: 
                     self._attr_current_option = "auto"
-                elif m_val == 1:
-                    self._attr_current_option = {2: "manual_low", 3: "manual_normal", 4: "manual_high"}.get(s_val, "manual_normal")
-                else:
-                    self._attr_current_option = {2: "crowded", 3: "refresh", 4: "fireplace", 5: "away", 6: "holiday"}.get(m_val)
+                elif m_val == 1: 
+                    self._attr_current_option = {2: "manual_low", 4: "manual_high"}.get(s_val, "manual_normal")
+                elif m_val == 2: self._attr_current_option = "crowded"
+                elif m_val == 3: self._attr_current_option = "refresh"
+                elif m_val == 4: self._attr_current_option = "fireplace"
+                elif m_val == 5: self._attr_current_option = "away"
+                elif m_val == 6: self._attr_current_option = "holiday"
         except Exception as e:
             _LOGGER.error("Systemair: Vent mode update failed: %s", e)

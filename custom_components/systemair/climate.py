@@ -5,9 +5,6 @@ from homeassistant.components.climate.const import (
     ClimateEntityFeature,
     HVACMode,
     HVACAction,
-    PRESET_AWAY,
-    PRESET_BOOST,
-    PRESET_HOME,
 )
 from homeassistant.const import (
     ATTR_TEMPERATURE,
@@ -23,24 +20,23 @@ from .const import DOMAIN, CONF_SLAVE
 
 _LOGGER = logging.getLogger(__name__)
 
-# --- MATCHING YOUR SELECT.PY MAPPINGS ---
+# --- MAPPING FOR SKRIVING (Register 1161) ---
 PRESET_MAP = {
-    "manual_low": (1, 2),
-    "manual_normal": (1, 3), 
-    "manual_high": (1, 4),   
-    "auto": (0, None),      
-    "crowded": (2, None),
-    "refresh": (3, None),
-    "fireplace": (4, None),
-    "away": (5, None),       
-    "holiday": (6, None),
+    "auto": (1, None),          # Skriver 1 -> Leser 0
+    "manual_low": (2, 2),       # Skriver 2 -> Leser 1
+    "manual_normal": (2, 3),    # Skriver 2 -> Leser 1
+    "manual_high": (2, 4),      # Skriver 2 -> Leser 1
+    "crowded": (3, None),       # Skriver 3 -> Leser 2
+    "refresh": (4, None),       # Skriver 4 -> Leser 3
+    "fireplace": (5, None),     # Skriver 5 -> Leser 4
+    "away": (6, None),          # Skriver 6 -> Leser 5
+    "holiday": (7, None),       # Skriver 7 -> Leser 6
 }
 
 async def async_setup_entry(hass, entry, async_add_entities):
     config = entry.data
-    hub_name = config.get("hub_name", "modbus_hub")
     from homeassistant.components.modbus import get_hub
-    hub = get_hub(hass, hub_name)
+    hub = get_hub(hass, config.get("hub_name", "modbus_hub"))
     if hub is None: return
     model = config.get(CONF_MODEL, "SAVE")
     slave = config.get(CONF_SLAVE, 1)
@@ -48,7 +44,6 @@ async def async_setup_entry(hass, entry, async_add_entities):
 
 class SystemAirClimate(ClimateEntity):
     _attr_has_entity_name = True
-    # Ved å sette translation_key kan du oversette presets og navn i JSON
     _attr_translation_key = "systemair_climate" 
     
     _attr_hvac_modes = [HVACMode.FAN_ONLY, HVACMode.HEAT, HVACMode.OFF]
@@ -75,19 +70,24 @@ class SystemAirClimate(ClimateEntity):
         return {"identifiers": {(DOMAIN, f"{self._model}_{self._slave}")}, "name": f"Systemair {self._model}", "manufacturer": "Systemair", "model": f"SAVE {self._model}"}
 
     async def async_set_hvac_mode(self, hvac_mode):
+        # 1 = Off, 3 = Normal (Viftehastighet register 1130)
         reg_val = 1 if hvac_mode == HVACMode.OFF else 3 
         await self._hub.async_pb_call(self._slave, 1130, reg_val, CALL_TYPE_WRITE_REGISTER)
         self._attr_hvac_mode = hvac_mode
         self.async_write_ha_state()
 
     async def async_set_preset_mode(self, preset_mode):
-        """Set the mode exactly like select.py does."""
         if preset_mode not in PRESET_MAP: return
         mode_val, speed_val = PRESET_MAP[preset_mode]
+        
+        # Skriv til User Mode (1161)
         await self._hub.async_pb_call(self._slave, 1161, mode_val, CALL_TYPE_WRITE_REGISTER)
+        
+        # Hvis det er en manuell modus, må vi også sette viftehastighet (1130)
         if speed_val is not None:
-            await asyncio.sleep(1.0)
+            await asyncio.sleep(1.0) # Modbus trenger ofte litt tid mellom to skriv
             await self._hub.async_pb_call(self._slave, 1130, speed_val, CALL_TYPE_WRITE_REGISTER)
+            
         self._attr_preset_mode = preset_mode
         self.async_write_ha_state()
 
@@ -98,45 +98,50 @@ class SystemAirClimate(ClimateEntity):
             self.async_write_ha_state()
 
     async def async_update(self):
+        """Hent data fra anlegget og synkroniser status."""
         try:
-            # 1. READ REGS
             res_curr = await self._hub.async_pb_call(self._slave, 12102, 1, CALL_TYPE_REGISTER_INPUT)
             res_target = await self._hub.async_pb_call(self._slave, 2000, 1, CALL_TYPE_REGISTER_HOLDING)
             res_mode = await self._hub.async_pb_call(self._slave, 1160, 1, CALL_TYPE_REGISTER_INPUT)
             res_speed = await self._hub.async_pb_call(self._slave, 1130, 1, CALL_TYPE_REGISTER_HOLDING)
             res_triac = await self._hub.async_pb_call(self._slave, 2148, 1, CALL_TYPE_REGISTER_HOLDING)
 
-            # 2. TEMPERATURES
+            # 1. Temperaturer
             if res_curr and hasattr(res_curr, 'registers'):
                 val = res_curr.registers[0]
                 if val > 32767: val -= 65536
                 if val != 0: self._attr_current_temperature = val / 10.0
-            if res_target and hasattr(res_target, 'registers'):
-                if res_target.registers[0] != 0:
-                    self._attr_target_temperature = res_target.registers[0] / 10.0
 
-            # 3. PRESET SYNC (Matching your select.py logic)
+            if res_target and hasattr(res_target, 'registers'):
+                self._attr_target_temperature = res_target.registers[0] / 10.0
+
+            # 2. Synkroniser Modus (Basert på din fungerende fan_mode sensor)
             if res_mode and hasattr(res_mode, 'registers'):
                 m_val = res_mode.registers[0]
-                s_val = res_speed.registers[0] if res_speed and hasattr(res_speed, 'registers') else None
+                s_val = res_speed.registers[0] if res_speed and hasattr(res_speed, 'registers') else 3
                 
                 if m_val == 0: 
-                    self._attr_preset_mode = "auto" # Rettet fra "Auto"
-                elif m_val == 1:
-                    self._attr_preset_mode = {2: "manual_low", 3: "manual_normal", 4: "manual_high"}.get(s_val, "manual_normal")
-                else:
-                    self._attr_preset_mode = {2: "crowded", 3: "refresh", 4: "fireplace", 5: "away", 6: "holiday"}.get(m_val)
+                    self._attr_preset_mode = "auto"
+                elif m_val == 1: # Manual
+                    # Sjekker viftehastighet (1130) for å skille mellom low/normal/high
+                    if s_val == 2: self._attr_preset_mode = "manual_low"
+                    elif s_val == 4: self._attr_preset_mode = "manual_high"
+                    else: self._attr_preset_mode = "manual_normal"
+                elif m_val == 2: self._attr_preset_mode = "crowded"
+                elif m_val == 3: self._attr_preset_mode = "refresh"
+                elif m_val == 4: self._attr_preset_mode = "fireplace"
+                elif m_val == 5: self._attr_preset_mode = "away"
+                elif m_val == 6: self._attr_preset_mode = "holiday"
        
-            # 4. HEATING ACTION
+            # 3. Varme-action og HVAC Mode
             is_heating = (res_triac.registers[0] > 0) if res_triac and hasattr(res_triac, 'registers') else False
 
             if is_heating:
                 self._attr_hvac_action = HVACAction.HEATING
                 self._attr_hvac_mode = HVACMode.HEAT
             else:
-                self._attr_hvac_action = HVACAction.IDLE if self._attr_hvac_mode != HVACMode.OFF else HVACAction.OFF
-                if self._attr_hvac_mode == HVACMode.HEAT:
-                    self._attr_hvac_mode = HVACMode.FAN_ONLY
+                self._attr_hvac_action = HVACAction.IDLE if s_val > 1 else HVACAction.OFF
+                self._attr_hvac_mode = HVACMode.OFF if s_val <= 1 else HVACMode.FAN_ONLY
 
         except Exception as e:
             _LOGGER.error("SystemAir Climate Update failed: %s", e)

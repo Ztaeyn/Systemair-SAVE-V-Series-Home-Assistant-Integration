@@ -8,18 +8,21 @@ from .const import DOMAIN, CONF_SLAVE
 _LOGGER = logging.getLogger(__name__)
 
 # --- ACTION MAPPINGS ---
-# (TranslationKey, ModeValue, SpeedValue)
+# (TranslationKey, ModeValue (1161), SpeedValue (1130))
+# Register 1161: 0=Auto, 1=Manual, 2=Crowded, 3=Refresh, 4=Fireplace, 5=Away, 6=Holiday
 VENT_ACTIONS = {
-    "btn_normal_mode": (2, 3),
-    "btn_low_speed": (2, 2),
-    "btn_high_speed": (2, 4),
-    "btn_fireplace": (5, None),
-    "btn_refresh": (4, None),
-    "btn_crowded": (3, None),
-    "btn_away": (6, None),
     "btn_auto": (1, None),
-    "btn_stop": (0, None),
+    "btn_low_speed": (2, 2),    # Skriver 2 -> Leser 1 (Manual)
+    "btn_normal_mode": (2, 3),  # Skriver 2 -> Leser 1 (Manual)
+    "btn_high_speed": (2, 4),   # Skriver 2 -> Leser 1 (Manual)
+    "btn_crowded": (3, None),   # Skriver 3 -> Leser 2
+    "btn_refresh": (4, None),   # Skriver 4 -> Leser 3
+    "btn_fireplace": (5, None), # Skriver 5 -> Leser 4
+    "btn_away": (6, None),      # Skriver 6 -> Leser 5
+    "btn_holiday": (7, None),   # Skriver 7 -> Leser 6
+    "btn_stop": (2, 0),         
 }
+
 
 async def async_setup_entry(hass, entry, async_add_entities):
     """Set up SystemAir buttons from a config entry."""
@@ -53,7 +56,6 @@ class SystemAirButton(ButtonEntity):
         self._mode_val = mode_val
         self._speed_val = speed_val
         
-        # Bruker translation_key i stedet for fast navn
         self._attr_translation_key = translation_key
         self._attr_unique_id = f"{DOMAIN}_{slave}_btn_{translation_key}"
         self._attr_icon = "mdi:play-box-outline"
@@ -73,9 +75,12 @@ class SystemAirButton(ButtonEntity):
             # 1. Skriv til Modus-register (1161)
             await self._hub.async_pb_call(self._slave, 1161, self._mode_val, CALL_TYPE_WRITE_REGISTER)
             
-            # 2. Skriv viftehastighet hvis nødvendig
+            # 2. Skriv viftehastighet hvis definert (brukes for Manuelle moduser/Stop)
             if self._speed_val is not None:
                 await asyncio.sleep(1.0)
                 await self._hub.async_pb_call(self._slave, 1130, self._speed_val, CALL_TYPE_WRITE_REGISTER)
+            
+            _LOGGER.debug("SystemAir: Button %s pressed, mode %s, speed %s", 
+                         self._attr_translation_key, self._mode_val, self._speed_val)
         except Exception as e:
             _LOGGER.error("SystemAir Button '%s' failed: %s", self._attr_translation_key, e)
