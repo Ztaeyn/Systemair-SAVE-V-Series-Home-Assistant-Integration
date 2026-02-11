@@ -7,5 +7,5 @@
   "dependencies": ["modbus"],
   "documentation": "https://github.com/Ztaeyn/Systemair-SAVE-V-Series-Home-Assistant-Integration",
   "iot_class": "local_polling",
-  "version": "1.4.2"
+  "version": "1.4.3"
 }
