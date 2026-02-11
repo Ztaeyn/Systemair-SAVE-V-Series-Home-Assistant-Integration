@@ -38,7 +38,9 @@
       "btn_crowded": { "name": "Selskapsmodus" },
       "btn_away": { "name": "Bortemodus" },
       "btn_auto": { "name": "Automodus" },
-      "btn_stop": { "name": "Stopp aggregat" }
+      "btn_stop": { "name": "Stopp aggregat" },
+      "btn_holiday": { "name": "Feriemodus" }
+
     },
     "climate": {
       "systemair_climate": {
