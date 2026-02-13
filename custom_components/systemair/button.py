@@ -9,7 +9,7 @@ _LOGGER = logging.getLogger(__name__)
 
 # --- ACTION MAPPINGS ---
 # (TranslationKey, ModeValue (1161), SpeedValue (1130))
-# Register 1161: 0=Auto, 1=Manual, 2=Crowded, 3=Refresh, 4=Fireplace, 5=Away, 6=Holiday
+# Register 1161: 1=Auto, 1=Manual, 3=Crowded, 4=Refresh, 5=Fireplace, 6=Away, 7=Holiday
 VENT_ACTIONS = {
     "btn_auto": (1, None),
     "btn_low_speed": (2, 2),    # Skriver 2 -> Leser 1 (Manual)
@@ -20,7 +20,7 @@ VENT_ACTIONS = {
     "btn_fireplace": (5, None), # Skriver 5 -> Leser 4
     "btn_away": (6, None),      # Skriver 6 -> Leser 5
     "btn_holiday": (7, None),   # Skriver 7 -> Leser 6
-    "btn_stop": (2, 0),         
+#    "btn_stop": (2, 0),         
 }
 
 

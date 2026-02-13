@@ -39,7 +39,7 @@
       "btn_away": { "name": "Away Mode" },
       "btn_auto": { "name": "Auto Mode" },
       "btn_stop": { "name": "Stop Unit" },
-      "btn_holiday": { "name": "Vacation Mode" }
+      "btn_holiday": { "name": "Holiday Mode" }
     },
     "climate": {
       "systemair_climate": {
