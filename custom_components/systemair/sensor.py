@@ -33,12 +33,12 @@ SYSTEMAIR_SENSORS = [
     ("calc_moisture_intake", 2211, SensorDeviceClass.HUMIDITY, "%", 1.0, "mdi:water-minus", SensorStateClass.MEASUREMENT),
 
     # --- Fans & Airflow ---
-    ("sf_rpm", 12400, None, "o/min", 1.0, "mdi:speedometer", SensorStateClass.MEASUREMENT),
-    ("ef_rpm", 12401, None, "o/min", 1.0, "mdi:speedometer", SensorStateClass.MEASUREMENT),
+    ("sf_rpm", 12400, None, "rpm", 1.0, "mdi:speedometer", SensorStateClass.MEASUREMENT),
+    ("ef_rpm", 12401, None, "rpm", 1.0, "mdi:speedometer", SensorStateClass.MEASUREMENT),
     ("sf_speed_pct", 14000, None, "%", 1.0, "mdi:fan", SensorStateClass.MEASUREMENT),
     ("ef_speed_pct", 14001, None, "%", 1.0, "mdi:fan", SensorStateClass.MEASUREMENT),
-    ("sf_flow_rate", 14000, None, "m³/t", 3.0, "mdi:home-switch", SensorStateClass.MEASUREMENT),
-    ("ef_flow_rate", 14001, None, "m³/t", 3.0, "mdi:home-switch", SensorStateClass.MEASUREMENT),
+    ("sf_flow_rate", 14000, None, "m³/h", 3.0, "mdi:home-switch", SensorStateClass.MEASUREMENT),
+    ("ef_flow_rate", 14001, None, "m³/h", 3.0, "mdi:home-switch", SensorStateClass.MEASUREMENT),
 
     # --- System Status & Energy ---
     ("fan_mode", 1160, None, None, 1.0, "mdi:air-conditioner", None),

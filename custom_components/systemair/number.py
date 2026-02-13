@@ -14,11 +14,11 @@ _LOGGER = logging.getLogger(__name__)
 SYSTEMAIR_NUMBERS = [
     # --- Main Controls ---
     ("supply_air_setpoint", 2000, 12, 30, 0.5, "°C", 10, "mdi:thermometer-lines", None),
-    ("holiday_duration", 1100, 1, 365, 1, "dager", 1, "mdi:airplane-takeoff", None),
-    ("away_duration", 1101, 1, 72, 1, "t", 1, "mdi:exit-run", None),
+    ("holiday_duration", 1100, 1, 365, 1, "days", 1, "mdi:airplane-takeoff", None),
+    ("away_duration", 1101, 1, 72, 1, "h", 1, "mdi:exit-run", None),
     ("fireplace_duration", 1102, 1, 60, 1, "min", 1, "mdi:fireplace", None),
     ("refresh_duration", 1103, 1, 240, 1, "min", 1, "mdi:air-filter", None),
-    ("crowded_duration", 1104, 1, 8, 1, "t", 1, "mdi:account-multiple-plus", None),
+    ("crowded_duration", 1104, 1, 8, 1, "h", 1, "mdi:account-multiple-plus", None),
     ("eco_offset", 2503, 0, 10, 0.5, "°C", 10, "mdi:leaf", None),
  
     # --- Temperature Configuration ---
@@ -39,28 +39,28 @@ SYSTEMAIR_NUMBERS = [
     ("summer_comp_max", 1257, 20, 50, 0.5, "°C", 10, "mdi:thermometer-chevron-up", EntityCategory.CONFIG),
 
     # --- Fan Speed Settings ---
-    ("sf_min_rpm", 1410, 500, 4500, 10, "o/min", 1, "mdi:fan-minus", EntityCategory.CONFIG),
-    ("ef_min_rpm", 1411, 500, 4500, 10, "o/min", 1, "mdi:fan-minus", EntityCategory.CONFIG),
-    ("sf_low_rpm", 1302, 500, 4500, 10, "o/min", 1, "mdi:fan-speed-1", EntityCategory.CONFIG),
-    ("ef_low_rpm", 1303, 500, 4500, 10, "o/min", 1, "mdi:fan-speed-1", EntityCategory.CONFIG),
-    ("sf_normal_rpm", 1414, 500, 4500, 10, "o/min", 1, "mdi:fan-speed-2", EntityCategory.CONFIG),
-    ("ef_normal_rpm", 1415, 500, 4500, 10, "o/min", 1, "mdi:fan-speed-2", EntityCategory.CONFIG),
-    ("sf_high_rpm", 1416, 500, 4500, 10, "o/min", 1, "mdi:fan-speed-3", EntityCategory.CONFIG),
-    ("ef_high_rpm", 1417, 500, 4500, 10, "o/min", 1, "mdi:fan-speed-3", EntityCategory.CONFIG),
-    ("sf_max_rpm", 1418, 500, 4500, 10, "o/min", 1, "mdi:fan-chevron-up", EntityCategory.CONFIG),
-    ("ef_max_rpm", 1419, 500, 4500, 10, "o/min", 1, "mdi:fan-chevron-up", EntityCategory.CONFIG),
+    ("sf_min_rpm", 1410, 500, 4500, 10, "rpm", 1, "mdi:fan-minus", EntityCategory.CONFIG),
+    ("ef_min_rpm", 1411, 500, 4500, 10, "rpm", 1, "mdi:fan-minus", EntityCategory.CONFIG),
+    ("sf_low_rpm", 1302, 500, 4500, 10, "rpm", 1, "mdi:fan-speed-1", EntityCategory.CONFIG),
+    ("ef_low_rpm", 1303, 500, 4500, 10, "rpm", 1, "mdi:fan-speed-1", EntityCategory.CONFIG),
+    ("sf_normal_rpm", 1414, 500, 4500, 10, "rpm", 1, "mdi:fan-speed-2", EntityCategory.CONFIG),
+    ("ef_normal_rpm", 1415, 500, 4500, 10, "rpm", 1, "mdi:fan-speed-2", EntityCategory.CONFIG),
+    ("sf_high_rpm", 1416, 500, 4500, 10, "rpm", 1, "mdi:fan-speed-3", EntityCategory.CONFIG),
+    ("ef_high_rpm", 1417, 500, 4500, 10, "rpm", 1, "mdi:fan-speed-3", EntityCategory.CONFIG),
+    ("sf_max_rpm", 1418, 500, 4500, 10, "rpm", 1, "mdi:fan-chevron-up", EntityCategory.CONFIG),
+    ("ef_max_rpm", 1419, 500, 4500, 10, "rpm", 1, "mdi:fan-chevron-up", EntityCategory.CONFIG),
 
     # --- Mode Setpoints ---
-    ("sf_holiday_setpoint", 1220, 500, 3500, 10, "o/min", 1, "mdi:speedometer-slow", EntityCategory.CONFIG),
-    ("ef_holiday_setpoint", 1221, 500, 3500, 10, "o/min", 1, "mdi:speedometer-slow", EntityCategory.CONFIG),
-    ("sf_hood_setpoint", 1222, 500, 4500, 10, "o/min", 1, "mdi:speedometer", EntityCategory.CONFIG),
-    ("ef_hood_setpoint", 1223, 500, 4500, 10, "o/min", 1, "mdi:speedometer", EntityCategory.CONFIG),
-    ("sf_vacuum_setpoint", 1224, 500, 4500, 10, "o/min", 1, "mdi:vacuum", EntityCategory.CONFIG),
-    ("ef_vacuum_setpoint", 1225, 500, 4500, 10, "o/min", 1, "mdi:vacuum", EntityCategory.CONFIG),
+    ("sf_holiday_setpoint", 1220, 500, 3500, 10, "rpm", 1, "mdi:speedometer-slow", EntityCategory.CONFIG),
+    ("ef_holiday_setpoint", 1221, 500, 3500, 10, "rpm", 1, "mdi:speedometer-slow", EntityCategory.CONFIG),
+    ("sf_hood_setpoint", 1222, 500, 4500, 10, "rpm", 1, "mdi:speedometer", EntityCategory.CONFIG),
+    ("ef_hood_setpoint", 1223, 500, 4500, 10, "rpm", 1, "mdi:speedometer", EntityCategory.CONFIG),
+    ("sf_vacuum_setpoint", 1224, 500, 4500, 10, "rpm", 1, "mdi:vacuum", EntityCategory.CONFIG),
+    ("ef_vacuum_setpoint", 1225, 500, 4500, 10, "rpm", 1, "mdi:vacuum", EntityCategory.CONFIG),
     ("moisture_setpoint", 2202, 10, 90, 1, "%", 1, "mdi:water-percent", EntityCategory.CONFIG),
 
     # --- System / Maintenance ---
-    ("filter_interval", 7000, 1, 12, 1, "mnd", 1, "mdi:calendar-clock", EntityCategory.CONFIG),
+    ("filter_interval", 7000, 1, 12, 1, "months", 1, "mdi:calendar-clock", EntityCategory.CONFIG),
 
     # --- Free Cooling ---
     ("fc_outdoor_day_min", 4101, 12.0, 30.0, 0.5, "°C", 10, "mdi:sun-thermometer", EntityCategory.CONFIG),
