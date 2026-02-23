@@ -1,3 +1,6 @@
+# Warning: I'm abandoning this as an active project, it will only be used for teaching myself python.
+# I recommend using https://github.com/Howard0000/home-assistant-systemair-modbus instead, which is more stable, and does not require any manual configuration in HA.
+
 # Systemair SAVE Modbus Integration for Home Assistant
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)
